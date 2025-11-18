@@ -9,7 +9,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-montserrat);
   --font-mono: var(--font-geist-mono);
   --color-sidebar-ring: var(--sidebar-ring);  
   --color-sidebar-border: var(--sidebar-border);
@@ -69,6 +69,7 @@
 
 
 :root {
+  --color-titulos: #0C3252;
   /*Estos son los colores que se usan en el proyecto*/
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -78,7 +79,7 @@
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
+  --secondary:#008BD8;
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
@@ -105,7 +106,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   /*Aqui son los colores de los componentes*/
   --accent: #FFFFFF;
-  --brand: #470A68;
+  --brand: #4A7729;
   --secundary: #FF7F40;
   --uaq-warning: oklch(78.19% 0.1585 72.33);
   --uaq-danger: #FE4141;
@@ -114,54 +115,18 @@
   --uaq-white-ghost: #FAFAFA; /*Fondo botones ghost*/
   /*Estos son los colores de el hover*/
   --accent-hover: #AD42D0;
-  --uaq-brand-hover: #AD42D0;
+  --uaq-brand-hover: #26460f;
   --uaq-success: #17C964;
-  --uaq-success-hover: oklch(0.5112 0.1819 153.21);
+  --uaq-success-hover: oklch(25.819% 0.06592 149.927);
   --uaq-warning-hover: oklch(0.5515 0.140162 66.5167);
 
   --uaq-danger-hover: oklch(0.5361 0.2142 13.65);
   --uaq-selected-hover: oklch(0.68 0.17 39.5);
 
   /* Nuevo color terniary */
-  --uaq-terniary: #8028A2;
-  --uaq-terniary-hover: #9933BF; /* opcional, para hover */
+  --uaq-terniary: #008BD8;
+  --uaq-terniary-hover: #043e5e; /* opcional, para hover */
   --uaq-selected-hover-sidebar: #ffb48f;
-}
-
-@font-face {
-  font-family: 'Futura';
-  src:
-    url('/fonts/FuturaBT-Book.woff2') format('woff2'),
-    url('/fonts/FuturaBT-Book.woff') format('woff');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Futura';
-  src:
-    url('/fonts/FuturaBT-Medium.woff2') format('woff2'),
-    url('/fonts/FuturaBT-Medium.woff') format('woff');
-  font-weight: 500;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Futura';
-  src:
-    url('/fonts/FuturaBT-Heavy.woff2') format('woff2'),
-    url('/fonts/FuturaBT-Heavy.woff') format('woff');
-  font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Futura';
-  src:
-    url('/fonts/FuturaBT-Light.woff2') format('woff2'),
-    url('/fonts/FuturaBT-Light.woff') format('woff');
-  font-weight: 300;
-  font-style: normal;
 }
 
 @layer base {
@@ -170,7 +135,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Futura', sans-serif;
+    font-family: var(--font-sans), sans-serif;
   }
 }
 
@@ -202,4 +167,12 @@
   display: inline-flex;
   min-width: max-content;
   animation: scroll-reverse 20s linear infinite;
+}
+.tiled-background {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.51), rgba(255, 255, 255, 0.51)), 
+                    url('/FondoLanding.png'); 
+  background-repeat: repeat;
+  background-attachment: fixed; 
+  background-size: 400px; 
+  
 }

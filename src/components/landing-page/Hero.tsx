@@ -1,43 +1,54 @@
-import Image from 'next/image';
-import { Button } from '../ui/button';
+// En: @/components/landing-page/Hero.tsx
+
 import Link from 'next/link';
+import { Button } from "@/components/ui/button";
+
 export function Hero() {
   return (
-    <div className="relative flex flex-col items-center justify-between gap-8 p-10 md:flex-row md:px-16 lg:px-48">
-      <div className="flex w-full flex-col items-center gap-4 text-center md:w-[686px] md:items-start md:text-left">
-        <h1 className="text-4xl font-bold text-zinc-800">
-          Plataforma virtual de empleo y bolsa de trabajo del Municipio  de Colon!
+    <section 
+      // --- CAMBIO AQUÍ ---
+      // 1. Quitamos 'px-24'
+      // 2. Añadimos 'justify-center' para centrar el bloque de contenido
+      // 3. Añadimos 'px-8' como un padding de seguridad para móviles
+      className="relative h-[552px] w-full flex items-center justify-center py-8 px-8"
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.24)), url('/Hero-Landing-2.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Este 'div' ahora estará centrado en la página */}
+      <div className="relative z-10 max-w-3xl text-white">
+        
+        {/* Esto seguirá estando a la izquierda (¡correcto!) */}
+        <h1 className="text-5xl font-bold mb-4 leading-tight text-left">
+          La comida deliciosa <br /> no debería terminar en la basura.
         </h1>
-
-        <p className="w-[400px] text-zinc-800">
-          Conecta con oportunidades laborales en tu municipio. Nuestra bolsa de trabajo en línea facilita el encuentro entre empresas 
-          y buscadores de empleo, impulsando el desarrollo económico y profesional en Colón.
+        
+        {/* Esto seguirá estando a la izquierda (¡correcto!) */}
+        <p className="text-lg mb-8 text-left">
+          Rescata comida, reduce el desperdicio y ahorra dinero en comiGO.
         </p>
 
-        <div className="mt-12 flex gap-4">
-          <Link href={"/signup/applicant"}>
-              <Button variant="primary" color='terniary'>Regístrate ahora</Button>
+        {/* Y esto ahora se centrará dentro del bloque centrado (¡correcto!) */}
+        <div className="w-full text-center">
+          <Link href="/registro">
+            <Button 
+              variant="primary" 
+              className="px-8 py-3 text-lg" 
+              style={{ 
+                backgroundColor: 'rgba(63, 140, 236, 0.31)', 
+                borderColor: 'white', 
+                borderWidth: '2px', 
+                borderRadius: '8px', 
+              }}
+            >
+              Regístrame
+            </Button>
           </Link>
         </div>
-      </div>
 
-      <div className="relative h-[575px] w-full md:h-[575px] md:w-[630px]">
-        <Image
-          src="/Hero-1.png"
-          width={510}
-          height={339}
-          alt=""
-          className="absolute top-0 right-0"
-        />
-
-        <Image
-          src="/Hero-2.png"
-          width={518}
-          height={348}
-          alt=""
-          className="absolute bottom-0 bottom-[-80px] left-0"
-        />
       </div>
-    </div>
+    </section>
   );
 }
