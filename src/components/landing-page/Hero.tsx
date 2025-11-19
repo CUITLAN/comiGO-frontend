@@ -32,7 +32,7 @@ export function Hero() {
 
         {/* Y esto ahora se centrará dentro del bloque centrado (¡correcto!) */}
         <div className="w-full text-center">
-          <Link href="/registro">
+          <Link href="/signup">
             <Button 
               variant="primary" 
               className="px-8 py-3 text-lg" 

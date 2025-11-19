@@ -7,7 +7,7 @@ import { employerSchema, EmployerFormType } from '@/validations/employerSchema';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import ImageUploadStep from './ImageUploadSignUp';
-import EmployerDetailsStep from './EmployerDetailsStep';
+import EmployerDetailsStep from './RestaurantDetailsStep';
 import Stepper from '@/components/common/Stepper';
 import CompanyDetails from './CompanyDetails';
 import { CompanyFormType, companySchema } from '@/validations/companySchema';
@@ -49,7 +49,7 @@ export default function SignUpEmployerCompany() {
       <form onSubmit={handleSubmit(onSubmit)} className="w-2xl w-[866px] rounded-lg bg-zinc-50 p-8 shadow-xl">
         <h2 className="mb-8 text-xl text-center text-[var(--uaq-selected-hover)]">Completa el registro de la empresa</h2>
         <p className="mb-6 text-center leading-5">
-          Por favor, completa la información general, fiscal y de ubicación de tu empresa para continuar con el registro
+          Por favor, completa l a información general, fiscal y de ubicación de tu empresa para continuar con el registro
         </p>
             <CompanyDetails control={control} />
               <Button type="submit" className='mt-[15px] mx-auto block'>
