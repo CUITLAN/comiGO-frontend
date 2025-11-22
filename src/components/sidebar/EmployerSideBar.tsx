@@ -1,49 +1,54 @@
-  'use client';
+'use client';
 
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
 import { SidebarNavButton } from './SidebarNavButton';
-import { Case,AddSquare,CaseRoundMinimalistic,Settings  } from '@solar-icons/react'
+import { 
+  Shop,             // Menu
+  AddSquare,        // Publicar
+  Wallet,           // Cuentas
+  User,             // Perfil
+  ChefHat,          // Ventas
+} from '@solar-icons/react';
 
 
 export default function EmployerSideBar() {
   const pathname = usePathname();
 
-  // Aqui tienen que cambiar el href a la ruta definida de su pantalla pueden tomar de ejemplo el de cartera de usuario
   const navLinks = [
-    { href: '/employer/home/vacancies', label: 'Vacantes', icon:Case},
-    { href: '/employer/home/post', label: 'Publicar vacantes', icon:AddSquare },
-    { href: '/employer/home/users', label: 'Cartera de usuarios' , icon: CaseRoundMinimalistic },
-    { href: '/employer/profileconfig', label: 'Ajustes',icon: Settings  },
+    { href: '/myrestaurant/home/publications', label: 'Menu', icon: Shop },
+    { href: '/myrestaurant/home/post', label: 'Publicar', icon: AddSquare },
+    { href: '/myrestaurant/home/account', label: 'Cuentas', icon: Wallet },
+    { href: '/employer/profile', label: 'Perfil', icon: User },
+    { href: '/employer/sales', label: 'Ventas', icon: ChefHat }, 
   ];
 
   return (
-    <nav className="group/sidebar bg-white h-screen w-15 hover:w-64 transition-all duration-300 ease-in-out flex flex-col justify-start pt-5 pl-2 pr-2 overflow-hidden stroke-3 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.3)] ">
-    
-
-      {/* Logos alineados */}
-      <div className="flex items-center gap-4">
-        <Link href="/">
-          <Image src="/colon_logo.png" alt="UAQ Logo" width={100} height={100} className="h-10 w-10 group-hover/sidebar:hidden 
-          0" />
-        </Link>
-
-        <Link href="/" className="hidden group-hover/sidebar:flex transition-opacity duration-200">
-          <Image
-            src="/Empleate_Colon_Logo.png"
-            alt="Bolsa de Trabajo Logo"
-            width={100}
-            height={100}
-            className="h-30 w-30"
-          />
-        </Link>
+    // Sidebar Container
+    <nav className="group/sidebar bg-white h-screen w-16 hover:w-64 transition-all duration-300 ease-in-out flex flex-col justify-start py-6 shadow-[4px_0_24px_0px_rgba(0,0,0,0.05)] z-50 border-r border-gray-100">
+      
+      {/* HEADER: "ComiGO" */}
+      <div className="h-16 flex items-center justify-center mb-4 overflow-hidden relative">
+         {/* Texto Completo (Visible al expandir) */}
+         <h1 className="text-[#0C3252] font-bold text-2xl transition-all duration-300 opacity-0 group-hover/sidebar:opacity-100 absolute left-6 whitespace-nowrap">
+            ComiGO
+         </h1>
+         
+         {/* Logo/Texto Colapsado (Visible al contraer) */}
+         <h1 className="text-[#0C3252] font-bold text-xl group-hover/sidebar:opacity-0 transition-opacity duration-300 absolute">
+            CG
+         </h1>
       </div>
 
-      {/* Vinculos a posibles nuevas paginas */}
-      <div className="text-[var(--uaq-selected-hover)] font-futura flex flex-col font-[400] pt-5 items-center group-hover/sidebar:items-stretch">
-        {navLinks.map(({ href, label, icon:Icon }) => (
-          <SidebarNavButton key={href} href={href} label={label} icon={Icon} active={pathname === href} />
+      {/* ITEMS DE NAVEGACIÓN */}
+      <div className="flex flex-col gap-1 px-0 items-center group-hover/sidebar:items-stretch">
+        {navLinks.map(({ href, label, icon }) => (
+          <SidebarNavButton 
+            key={href} 
+            href={href} 
+            label={label} 
+            icon={icon} 
+            active={pathname === href} 
+          />
         ))}
       </div>
     </nav>

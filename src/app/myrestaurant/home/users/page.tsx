@@ -1,4 +1,4 @@
-/*'use client';
+'use client';
 
 import React, { useMemo, useState } from 'react'
 import ApplicantCard from '../../../../components/linker/ApplicantCard';
@@ -139,4 +139,4 @@ export default function UserLists() {
 
         </main>
     )
-}*/
+}

@@ -1,79 +1,67 @@
 'use client';
-import FormInput from '@/components/forms/FormInput';
-import * as React from 'react';
-import { Button } from '@/components/ui/button';
+
+import { useState } from 'react';
 import HeaderSimple from '@/components/ui/header-simple';
-import { zodResolver } from '@hookform/resolvers/zod';
-import Link from 'next/link';
-import {useForm,FormProvider} from 'react-hook-form';
-import {LoginFormType,loginSchema} from '@/validations/loginSchema';
-import { ArrowBigLeft, ArrowLeft, MoveLeft } from 'lucide-react';
 
-export default function Page() {
-  const methods = useForm<LoginFormType>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-    },
-    mode: 'onSubmit',
-  });
+// Importamos los componentes (que crearemos a continuación)
+import EmailStep from '@/components/applicant/EmailStep';
+import OtpStep from '@/components/applicant/OtpStep';
+import NewPasswordStep from '@/components/applicant/NewPasswordStep';
+import SuccessStep from '@/components/applicant/SuccessStep';
 
-  const { control,handleSubmit } = methods;
+export default function RecoveryPage() {
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState(''); // Guardamos el email para pasarlo al paso 2
 
-  const onSubmit = (data: LoginFormType) => {//Enviar el código de recuperación a el correo
-      console.log(data);
-      // Llamada a la API 
-    };
+  // Lógica para cambiar el fondo según el paso
+  const getBackgroundImage = () => {
+    return 'url("/Recovery32.png")';
+  };
 
-    
   return (
     <>
       <HeaderSimple />
-      <div className="flex min-h-screen flex-col items-center justify-center py-1"
+      <div 
+        className="flex min-h-screen flex-col items-center justify-center py-1 transition-all duration-500"
         style={{
-          backgroundImage: 'url("/backgroundSignUp.png")',
+          backgroundImage: getBackgroundImage(),
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundBlendMode: 'overlay',
-        }}>
-       <main className="flex h-fit flex-col items-center justify-center gap-10">
+        }}
+      >
+        <main className="flex h-fit flex-col items-center justify-center gap-10 w-full">
+          
+          {/* Renderizado Condicional de Pasos */}
+          
+          {step === 1 && (
+            <EmailStep 
+              onNext={(emailInput) => {
+                setEmail(emailInput);
+                setStep(2);
+              }} 
+            />
+          )}
 
-        <div className='h-full w-full max-w-2xl space-y-8 rounded-md border border-gray-300 bg-white px-12 py-6 shadow-sm'>
-            <Link href="/">
-              <Button variant="ghost" className='scale-150'>
-                <ArrowLeft className="h-50 w-50" />
-              </Button>
-            </Link>
-            <div className="flex flex-col items-center gap-4">
-               <img src="/ADMON24-27-1-03.png" alt="Recuperación de contraseña" className="scale-50"/>
-              <h1 className="text-3xl font-medium -space-y-28">¿Olvidaste tu contraseña?</h1>
-              <p className="text-center">No te preocupes, si sucede solo sigue las instrucciones para crear una nueva contraseña</p>
-            </div>
+          {step === 2 && (
+            <OtpStep 
+              email={email}
+              onNext={() => setStep(3)}
+              onBack={() => setStep(1)}
+            />
+          )}
 
-              <FormProvider {...methods}> 
-                  <form onSubmit={methods.handleSubmit(onSubmit)} className="mt-8 space-y-4">
-                    <div className="space-y-10 ">
-                      <FormInput
-                      name="email"
-                      label="Correo electrónico"
-                      type="email"
-                      placeholder="Ingresa tu correo electrónico"
-                      control={control}
-                      maxChars={244}
-                    />
-                    </div>
-                    <div className="items-center text-center mt-8">
-                      <Button type="submit" onClick={ () =>console.log("Continuar a validation")}>
-                          Continuar
-                      </Button>
-                    </div>
-                  </form>
-              </FormProvider>
-               
-            
+          {step === 3 && (
+            <NewPasswordStep 
+              onNext={() => setStep(4)}
+            />
+          )}
 
-        </div>
-       </main>
+          {step === 4 && (
+            <SuccessStep />
+          )}
+
+        </main>
       </div>
     </>
   );

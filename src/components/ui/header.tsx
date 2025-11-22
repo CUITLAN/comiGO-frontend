@@ -60,10 +60,7 @@ export default function Header({
                 {/* ... (Tu código de los logos de la izquierda no cambia) ... */}
                 <div className='flex items-center gap-4 py-4'>
                     <Link href="/" className="text-lg font-bold">
-                        <img src="/UCQC.png" alt="Colon" className="h-10 w-28 scale-100"/>
-                    </Link>
-                    <Link href="/" className="text-lg font-bold">
-                        <img src="/ADMON24-27-1-03.png" alt="Colon" className="h-10 w-28 scale-100"/>
+                        <img src="/Comigo-Logo.png" alt="Colon" className="h-10 w-28 scale-100"/>
                     </Link>
                 </div>
                 

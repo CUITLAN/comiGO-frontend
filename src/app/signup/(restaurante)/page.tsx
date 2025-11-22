@@ -23,6 +23,16 @@ export default function SignUpEmployerPage() {
             image: "/Signup3.png", 
             title: "Casi listo \n Queremos conocer tu negocio",
             alt: "Platillos del restaurante"
+        },
+        4: {
+            image: "/Signup-Step4-Street.jpg", // Usa la imagen de la calle que tienes
+            title: "Ya casi \n Ahora dime, en dónde está ubicado",
+            alt: "Calle del restaurante"
+        },
+        5: {
+            image: "/Signup-Step5-Happy.jpg", // Una imagen de celebración o equipo feliz
+            title: "¡Todo listo! \n Revisa que la información sea correcta",
+            alt: "Equipo del restaurante"
         }
     };
     

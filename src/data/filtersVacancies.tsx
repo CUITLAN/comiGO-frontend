@@ -1,45 +1,38 @@
 import { filterType } from "@/interfaces/table";
 
 export const filtersVacancies: filterType[] = [
-{
-  value: 'sector',
-    name: 'Sector',
+  {
+    value: 'state', // Mapea a la columna 'state'
+    name: 'Estado',
     options: [
-      { label: 'Tecnología', value: 'Tecnología' },
-      { label: 'Salud', value: 'Salud' },
-      { label: 'Educación', value: 'Educación' },
-      { label: 'Finanzas', value: 'Finanzas' },
-      { label: 'Marketing', value: 'Marketing' },
-      { label: 'Ingeniería', value: 'Ingeniería' },
-      { label: 'Ventas', value: 'Ventas' },
-      { label: 'Recursos Humanos', value: 'Recursos Humanos' },
-      { label: 'Logística', value: 'Logística' },
-      { label: 'Construcción', value: 'Construcción' },
+      { label: 'Disponible', value: 'Activo' }, // Asumo que 'Activo' en BD es 'Disponible' visualmente
+      { label: 'En revisión', value: 'EnRevisión' },
+      { label: 'Agotada', value: 'Agotada' },
+      { label: 'Cerrado', value: 'Cerrado' },
     ],
-},
-{
-  value: 'modality',
-  name: 'Modalidad',
-  options: [
-    { label: 'Remoto', value: 'Remoto' },
-    { label: 'Presencial', value: 'Presencial' },
-    { label: 'Híbrido', value: 'Híbrido' },
-  ]
-},
-{
-  value: 'createdAt',
-  name: 'Fecha de publicación',
-  isDate: true,
-},
-{
-  value: 'schedule',
-  name: 'Tipo de jornada',
-  options: [
-    { label: 'Tiempo Completo', value: 'tiempo completo' },
-    { label: 'Medio Tiempo', value: 'Medio Tiempo' },
-    { label: 'Horario flexible', value: 'Horario flexible' },
-    { label: 'Pago por hora', value: 'Pago por hora' },
-    { label: 'Prácticas', value: 'Prácticas' },
-  ]
-}
-]
+  },
+  {
+    value: 'workShift', // En tu columna anterior usaste workShift para "Tipo"
+    name: 'Tipo',
+    options: [
+      { label: 'Paquete', value: 'Packete' }, // Ajusta el value según venga de tu BD
+      { label: 'Platillo', value: 'Platillo' },
+    ]
+  },
+  {
+    value: 'modality', // En tu columna anterior usaste modality para "Categoría"
+    name: 'Categoría',
+    options: [
+      { label: 'Cafetería', value: 'Cafeteria' },
+      { label: 'Carnes y frías', value: 'Carnes y frías' },
+      { label: 'Aceite', value: 'Aceite' },
+      { label: 'Alcohol', value: 'Alcohol' },
+      // Agrega más categorías según necesites
+    ]
+  },
+  {
+    value: 'createdAt',
+    name: 'Fecha de publicación',
+    isDate: true,
+  },
+];

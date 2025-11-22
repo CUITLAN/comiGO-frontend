@@ -1,12 +1,12 @@
-import React from 'react'
-import VacancyPublishForm from '@/components/forms/vacancy/VacancyPublishForm';
+import React from 'react';
+import FoodPublishForm from '@/components/forms/vacancy/FoodPublishForm';
 
-export default function VacancyFormPage()  {
+export default function CreateProductPage() {
   return (
-    <main className='flex flex-col bg-accent z-0 items-center py-13 m-0'>
-        <div className='w-7/12 align-center flex flex-col bg-white !z-0 rounded-lg border-1 border-zinc-300 pb-12'>
-            <VacancyPublishForm />
+    <main className='flex flex-col items-center py-10 min-h-screen bg-gray-50'>
+        <div className='w-full max-w-4xl flex flex-col bg-white rounded-xl border border-gray-200 shadow-sm'>
+            <FoodPublishForm />
         </div>
     </main>
-  )
+  );
 }

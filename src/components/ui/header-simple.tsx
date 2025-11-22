@@ -2,40 +2,27 @@
 
 import Link from 'next/link';
 import * as React from 'react';
-import Image from 'next/image';
-import { User,Logout2} from '@solar-icons/react';
-import { Button } from "@/components/ui/button"; // si usas shadcn/ui
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem
-} from '@/components/ui/dropdown-menu';
+import Image from 'next/image'; // Importaste 'next/image' pero usas <img>, lo cual está bien.
+import { Button } from "@/components/ui/button";
 
-interface HeaderProps{
-    userIcon?: React.ReactNode;
-    logOut?: React.ReactNode;
-    companyImageUrl?: string;
-    companyTitle?: string;
-}
-
-export default function Headersimple({ 
-    companyTitle='Deloitte Qro', //Obtener el nombre de la compañía
-    companyImageUrl='/Deloitte.svg', //Obtener el logo de la compañía
-    userIcon = <User className="h-5 w-5"/> , 
-    logOut = <Logout2 className='h-5 w-5'/> }: HeaderProps) {
-  return (
-    <>
-        <header className='bg--accent flex items-center justify-between px-10 border-b border-zinc-200 drop-shadow-md'>
-            <div className='flex items-center gap-4 py-4'>
-                <Link href="/" className="text-lg font-bold">
-                    <img src="/UCQC.png" alt="Colon"  className="h-10 w-28 scale-100"/>
-                </Link>
-                <Link href="/" className="text-lg font-bold">
-                    <img src="/ADMON24-27-1-03.png" alt="Colon" className="h-10 w-28 scale-100"/>
-                </Link>
-             </div> 
-        </header>    
-    </>
-  );
+export default function LandingHeader() {
+    const header = '#0C3252';
+    
+    return(
+        <>
+            <header className='bg--accent flex items-center justify-between px-10 border-b border-zinc-200 drop-shadow-md'>
+                
+                <div className="flex items-center gap-8">
+                    <div className='flex items-center gap-4 py-4'>
+                        <Link href="/" className="text-lg font-bold">
+                            <img src="/Comigo-Logo.png" alt="Comigo"  className="h-20 w-55 scale-100"/>
+                        </Link>
+                    </div> 
+                    
+                </div>
+                
+                
+            </header>
+        </>
+    );
 }
