@@ -18,8 +18,8 @@ export default function EmployerSideBar() {
     { href: '/myrestaurant/home/publications', label: 'Menu', icon: Shop },
     { href: '/myrestaurant/home/post', label: 'Publicar', icon: AddSquare },
     { href: '/myrestaurant/home/account', label: 'Cuentas', icon: Wallet },
-    { href: '/employer/profile', label: 'Perfil', icon: User },
-    { href: '/employer/sales', label: 'Ventas', icon: ChefHat }, 
+    { href: '/myrestaurant/home/profile', label: 'Perfil', icon: User },
+    { href: '/myrestaurant/home/sales', label: 'Ventas', icon: ChefHat }, 
   ];
 
   return (
@@ -41,15 +41,22 @@ export default function EmployerSideBar() {
 
       {/* ITEMS DE NAVEGACIÓN */}
       <div className="flex flex-col gap-1 px-0 items-center group-hover/sidebar:items-stretch">
-        {navLinks.map(({ href, label, icon }) => (
-          <SidebarNavButton 
-            key={href} 
-            href={href} 
-            label={label} 
-            icon={icon} 
-            active={pathname === href} 
-          />
-        ))}
+        {navLinks.map(({ href, label, icon }) => {
+            // CORRECCIÓN: Usamos .startsWith(href)
+            // Esto asegura que si estás en '/myrestaurant/home/profile/restaurant',
+            // el botón de 'Perfil' (que es '/myrestaurant/home/profile') se mantenga activo.
+            const isActive = pathname?.startsWith(href);
+
+            return (
+              <SidebarNavButton 
+                key={href} 
+                href={href} 
+                label={label} 
+                icon={icon} 
+                active={isActive} 
+              />
+            );
+        })}
       </div>
     </nav>
   );

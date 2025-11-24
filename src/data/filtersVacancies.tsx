@@ -1,34 +1,34 @@
 import { filterType } from "@/interfaces/table";
+import { PRODUCT_CATEGORIES, ProductCategory } from "@/interfaces/ProductCategory";
 
 export const filtersVacancies: filterType[] = [
   {
-    value: 'state', // Mapea a la columna 'state'
+    value: 'state', 
     name: 'Estado',
     options: [
-      { label: 'Disponible', value: 'Activo' }, // Asumo que 'Activo' en BD es 'Disponible' visualmente
+      { label: 'Disponible', value: 'Activo' }, 
       { label: 'En revisión', value: 'EnRevisión' },
       { label: 'Agotada', value: 'Agotada' },
       { label: 'Cerrado', value: 'Cerrado' },
+      { label: 'Rechazado', value: 'Rechazado' },
     ],
   },
   {
-    value: 'workShift', // En tu columna anterior usaste workShift para "Tipo"
+    value: 'foodType', // Antes workShift
     name: 'Tipo',
     options: [
-      { label: 'Paquete', value: 'Packete' }, // Ajusta el value según venga de tu BD
+      { label: 'Paquete', value: 'Packete' }, 
       { label: 'Platillo', value: 'Platillo' },
     ]
   },
   {
-    value: 'modality', // En tu columna anterior usaste modality para "Categoría"
+    value: 'category', // Antes modality
     name: 'Categoría',
-    options: [
-      { label: 'Cafetería', value: 'Cafeteria' },
-      { label: 'Carnes y frías', value: 'Carnes y frías' },
-      { label: 'Aceite', value: 'Aceite' },
-      { label: 'Alcohol', value: 'Alcohol' },
-      // Agrega más categorías según necesites
-    ]
+    // Mapeamos dinámicamente las categorías importadas
+    options: PRODUCT_CATEGORIES.map(cat => ({
+        label: cat,
+        value: cat
+    }))
   },
   {
     value: 'createdAt',

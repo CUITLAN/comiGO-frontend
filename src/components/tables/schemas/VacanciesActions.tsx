@@ -1,9 +1,11 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { 
   MenuDots, 
-  Eye,        // Para "Ver publicación"
-  Pen,        // Para "Editar"
-  CloseSquare // Para "Cerrar"
+  Eye,        
+  Pen,        
+  CloseSquare 
 } from '@solar-icons/react';
 import {
   DropdownMenu,
@@ -14,12 +16,14 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Drawer } from '@/components/ui/drawer';
-import DrawerVacante from '@/components/DrawerVacante/DrawerVacante'; // Tu drawer existente
+import DrawerVacante from '@/components/DrawerVacante/DrawerVacante';
 import * as React from 'react';
 import { Vacancy } from '@/interfaces/vacancy';
+import { useRouter } from 'next/navigation'; // 1. Importamos useRouter
 
 export default function RowActions({ row }: { row: { original: Vacancy } }) {
   const [open, setOpen] = React.useState(false);
+  const router = useRouter(); // 2. Inicializamos el router
 
   return (
     <Drawer direction="right" open={open} onOpenChange={setOpen}>
@@ -31,7 +35,7 @@ export default function RowActions({ row }: { row: { original: Vacancy } }) {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent align="end" className="w-48 border-gray-100 shadow-lg rounded-xl">
+        <DropdownMenuContent align="end" className="w-48 border-gray-100 shadow-lg rounded-xl z-50 bg-white">
           <DropdownMenuLabel className="text-[#6D28D9]">Acciones</DropdownMenuLabel>
           
           {/* Ver Publicación -> Abre el Drawer */}
@@ -41,12 +45,12 @@ export default function RowActions({ row }: { row: { original: Vacancy } }) {
             className="cursor-pointer text-gray-600 hover:text-[#6D28D9] hover:bg-purple-50 focus:bg-purple-50 focus:text-[#6D28D9]"
           >
             <Eye className="mr-2 h-4 w-4" />
-            Ver publicación
+            Ver detalle
           </DropdownMenuItem>
 
-          {/* Editar */}
+          {/* Editar -> Navegación Dinámica */}
           <DropdownMenuItem 
-            onClick={() => console.log('Editar', row.original.id)}
+            onClick={() => router.push(`/myrestaurant/home/post/${row.original.id}`)}
             className="cursor-pointer text-gray-600 hover:text-[#6D28D9] hover:bg-purple-50 focus:bg-purple-50 focus:text-[#6D28D9]"
           >
             <Pen className="mr-2 h-4 w-4" />
@@ -55,18 +59,18 @@ export default function RowActions({ row }: { row: { original: Vacancy } }) {
           
           <DropdownMenuSeparator className="bg-gray-100" />
 
-          {/* Cerrar */}
+          {/* Cerrar / Pausar */}
           <DropdownMenuItem 
             onClick={() => console.log('Cerrar vacante', row.original.id)}
             className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 focus:bg-red-50 focus:text-red-700"
           >
             <CloseSquare className="mr-2 h-4 w-4" />
-            Cerrar
+            Pausar publicación
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
       
-      {/* Componente del Drawer para ver detalles */}
+      {/* Componente del Drawer con la info de comida */}
       <DrawerVacante vacante={row.original} />
     </Drawer>
   );

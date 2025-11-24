@@ -1,38 +1,28 @@
-// TODO add upload image functionality
-import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { UploadMinimalistic } from '@solar-icons/react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface InfoCardProps {
   avatar: string;
   name: string;
   email: string;
-  cellphone: string | null;
+  cellphone?: string; // Lo dejamos opcional para que no te de error si falta
 }
 
 export const InfoCard = ({ avatar, name, email, cellphone }: InfoCardProps) => {
   return (
-    <div className="ml-12 flex h-32 w-full flex-row p-4">
-      <Avatar className="h-24 w-24 transition-all duration-200">
-        <AvatarImage src={avatar} />
-        <AvatarFallback>CN</AvatarFallback>
-
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 hover:opacity-100">
-          <div className="absolute inset-0 flex items-center justify-center bg-black opacity-50 transition-opacity duration-200"></div>
-          <UploadMinimalistic
-            size={52}
-            weight="Bold"
-            mirrored
-            color="white"
-            className="absolute opacity-100"
-          />
-        </div>
+    <div className="flex items-center gap-4 p-2">
+      {/* Avatar Circular a la izquierda */}
+      <Avatar className="h-16 w-16 border border-gray-200 shadow-sm">
+        <AvatarImage src={avatar} alt={name} className="object-cover" />
+        <AvatarFallback className="bg-gray-100 text-gray-500 font-bold">
+          {name.substring(0, 2).toUpperCase()}
+        </AvatarFallback>
       </Avatar>
 
-      <div className="flex flex-col justify-center pl-6">
-        <p className="text-xl font-bold text-zinc-800">{name}</p>
-        <p className="text-zinc-800 italic">{email}</p>
-        {cellphone ?? <p className="text-zinc-800 italic">{cellphone}</p>}
+      {/* Texto a la derecha */}
+      <div className="flex flex-col justify-center overflow-hidden">
+        <h3 className="text-base font-bold text-[#0C3252] truncate">{name}</h3>
+        <p className="text-sm text-gray-500 italic truncate">{email}</p>
+        {cellphone && <p className="text-xs text-gray-400">{cellphone}</p>}
       </div>
     </div>
   );

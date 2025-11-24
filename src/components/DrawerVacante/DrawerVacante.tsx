@@ -3,15 +3,15 @@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import {
-  Balloon,
-  Buildings,
-  Calendar,
-  ClockCircle,
-  DollarMinimalistic,
-  Gps,
-  MapPoint,
-  UserRounded,
-  UsersGroupRounded,
+  Bag,            
+  Tag,            
+  ClockCircle,    
+  DollarMinimalistic, 
+  MapPoint,       
+  Layers,         
+  Sale,           
+  InfoSquare,
+  Calendar
 } from '@solar-icons/react';
 import { Vacancy } from '@/interfaces/vacancy';
 import {
@@ -20,42 +20,62 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
+import Image from 'next/image';
 
-const stateLabel: Record<Vacancy['state'], string> = {
-  Activo: 'Activo',
+const stateLabel: Record<string, string> = {
+  Activo: 'Aprobado / Activo',
   EnRevisión: 'En Revisión',
   Cerrado: 'Cerrado',
   Rechazado: 'Rechazado',
+  Agotada: 'Agotada',
 };
 
-const stateVariant = (state: Vacancy['state']) =>
-  state === 'Activo' ? 'success' : state === 'EnRevisión' ? 'warning' : 'danger';
+const stateVariant = (state: string) => {
+  switch (state) {
+    case 'Activo': return 'success';
+    case 'EnRevisión': return 'warning';
+    case 'Rechazado': return 'danger';
+    case 'Agotada': return 'secondary';
+    default: return 'outline';
+  }
+};
 
 const formatDate = (d?: string | Date) => {
   if (!d) return '—';
-  const date = d instanceof Date ? d : new Date(d);
+  const date = new Date(d);
   return date.toLocaleDateString('es-MX', {
-    day: '2-digit',
-    month: 'short',
+    day: 'numeric',
+    month: 'long',
     year: 'numeric',
   });
 };
+
+const formatMoney = (amount: number) => 
+    new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
 
 function InfoRow({
   icon: Icon,
   label,
   value,
+  highlight = false
 }: {
   icon: React.ElementType;
   label: string;
   value?: string | number | null;
+  highlight?: boolean;
 }) {
   if (value === undefined || value === null || value === '') return null;
   return (
-    <div className="flex items-center gap-2">
-      <Icon />
-      <p className="text-[16px] leading-normal font-normal text-zinc-600">{label}:</p>
-      <p className="text-[16px] leading-normal font-normal text-zinc-600">{String(value)}</p>
+    <div className={`flex items-center gap-3 p-2 rounded-lg ${highlight ? 'bg-green-50 border border-green-100' : 'bg-transparent'}`}>
+      <div className={`p-2 rounded-full ${highlight ? 'bg-white text-[#4A7729]' : 'bg-gray-100 text-gray-500'}`}>
+        <Icon size={20} />
+      </div>
+      <div>
+        <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">{label}</p>
+        <p className={`text-sm font-semibold ${highlight ? 'text-[#4A7729] text-base' : 'text-gray-700'}`}>
+            {value}
+        </p>
+      </div>
     </div>
   );
 }
@@ -66,125 +86,135 @@ type DrawerVacanteProps = {
 
 export default function DrawerVacante({ vacante }: DrawerVacanteProps) {
   const {
-    name,
-    modality,
-    workShift,
-    location,
+    productName,
+    foodType,
+    category,
+    branch,
+    portions,
     description,
-    ageRange,
-    salary,
-    industryCategory,
-    gender,
-    vacancyCareer,
-    employeeBenefit,
-    additionaSupport,
-    experience,
-    numberOpening,
-    limitApply,
-    createdAt,
-    requiredProfile,
+    price,
+    elaborationDate,
+    pickupStartTime,
+    pickupEndTime,
+    deadlineDate,
+    finalOffer,
     state,
-    applications,
-    workingDay,
+    createdAt,
+    productImage
   } = vacante;
 
   return (
-    <DrawerContent className="flex !w-[50vw] !max-w-none flex-col gap-7 overflow-y-auto p-8">
-      <DrawerHeader className="flex flex-col gap-4 !p-0">
-        <DrawerTitle className="text-[30px] leading-normal font-bold text-zinc-800">
-          {name}
-        </DrawerTitle>
-        <DrawerDescription asChild>
-          <div className="flex items-center justify-between">
-            <Badge variant={stateVariant(state)}>{stateLabel[state]}</Badge>
-            <p className="text-[16px] leading-normal font-normal">
-              Solicitado: {formatDate(createdAt)}
-            </p>
-          </div>
-        </DrawerDescription>
-      </DrawerHeader>
-      {(limitApply || numberOpening) && (
-        <div className="flex items-center justify-between rounded-3xl border-1 border-zinc-300 bg-zinc-100 px-6 py-4">
-          <p className="text-[16px] leading-normal font-normal">
-            Solicitudes máximas permitidas: {limitApply ?? '—'}
-          </p>
-          <div className="gap-2 rounded-3xl border-1 border-zinc-300 bg-white px-3 py-1">
-            <p className="text-[16px] leading-normal font-normal">
-              {numberOpening ?? 0} posiciones disponibles
-            </p>
-          </div>
+    <DrawerContent className="flex !w-[500px] !max-w-full flex-col gap-0 h-full max-h-screen rounded-l-2xl rounded-r-none focus:outline-none ml-auto z-[100]">
+      
+      {/* --- HEADER --- */}
+      <DrawerHeader className="border-b border-gray-100 px-8 py-6 bg-white">
+        <div className="flex flex-col gap-2">
+            <div className="flex items-start justify-between">
+                <Badge variant={stateVariant(state)} className="mb-2 w-fit">
+                    {stateLabel[state] || state}
+                </Badge>
+                <span className="text-xs text-gray-400">
+                    Publicado: {formatDate(createdAt)}
+                </span>
+            </div>
+            
+            <DrawerTitle className="text-2xl leading-tight font-bold text-[#0C3252]">
+            {productName}
+            </DrawerTitle>
+            
+            <DrawerDescription className="text-sm text-gray-500 flex items-center gap-1">
+                <MapPoint size={14} />
+                {branch}
+            </DrawerDescription>
         </div>
-      )}
-      <div className="flex flex-col gap-2">
-        <InfoRow icon={MapPoint} label="Dirección" value={location} />
-        <InfoRow icon={Gps} label="Modalidad" value={modality} />
-        <InfoRow icon={ClockCircle} label="Jornada" value={workShift} />
-        <InfoRow icon={Calendar} label="Días laborales" value={workingDay?.join(' a ')} />
-        <InfoRow
-          icon={DollarMinimalistic}
-          label="Salario"
-          value={`$${salary?.min} - $${salary?.max}`}
-        />
-        <InfoRow icon={UserRounded} label="Género" value={gender} />
-        <InfoRow icon={Balloon} label="Edad" value={`${ageRange?.min} - ${ageRange?.max} años`} />
-        <InfoRow icon={Buildings} label="Sector" value={industryCategory} />
-        <InfoRow icon={UsersGroupRounded} label="Aplicaciones actuales" value={applications} />
+      </DrawerHeader>
+
+      {/* --- BODY --- */}
+      <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-[#FAFAFA]">
+        
+        {/* Imagen */}
+        <div className="w-full h-48 rounded-xl overflow-hidden bg-gray-200 border border-gray-200 relative shadow-sm">
+            {productImage ? (
+                <Image src={productImage} alt={productName} fill className="object-cover" />
+            ) : (
+                <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                    <Bag size={48} className="opacity-20 mb-2" />
+                    <span className="text-xs uppercase font-bold opacity-40">Sin imagen</span>
+                </div>
+            )}
+            
+            {/* Badge de Oferta Final */}
+            {finalOffer && (
+                <div className="absolute top-3 right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center gap-1">
+                    <Sale size={12} /> Oferta Final
+                </div>
+            )}
+        </div>
+
+        {/* Información Principal (Grid) */}
+        <section className="grid grid-cols-2 gap-4">
+            <InfoRow 
+                icon={DollarMinimalistic} 
+                label="Precio" 
+                value={formatMoney(price)} 
+                highlight={true}
+            />
+            <InfoRow 
+                icon={Layers} 
+                label="Porciones" 
+                value={portions} 
+            />
+            <InfoRow 
+                icon={Bag} 
+                label="Tipo" 
+                value={foodType} 
+            />
+            <InfoRow 
+                icon={Tag} 
+                label="Categoría" 
+                value={category} 
+            />
+        </section>
+
+        <Separator className="bg-gray-200" />
+
+        {/* Fechas y Horarios */}
+        <section className="space-y-4">
+            <h4 className="text-sm font-bold text-[#0C3252] uppercase flex items-center gap-2">
+                <ClockCircle size={16} className="text-[#4A7729]" />
+                Tiempos de Recogida y Fechas
+            </h4>
+            
+            <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-4">
+                <div className="flex justify-between items-center border-b border-gray-50 pb-3">
+                    <span className="text-sm text-gray-600">Horario de recogida</span>
+                    <span className="font-bold text-[#0C3252] bg-blue-50 px-2 py-1 rounded text-sm">
+                        {pickupStartTime} - {pickupEndTime}
+                    </span>
+                </div>
+                <div className="flex justify-between items-center border-b border-gray-50 pb-3">
+                    <span className="text-sm text-gray-600">Fecha Límite</span>
+                    <span className="text-sm font-medium text-gray-800">{formatDate(deadlineDate)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Elaboración</span>
+                    <span className="text-sm font-medium text-gray-800">{formatDate(elaborationDate)}</span>
+                </div>
+            </div>
+        </section>
+
+        {/* Descripción */}
+        <section className="space-y-2">
+             <h4 className="text-sm font-bold text-[#0C3252] uppercase flex items-center gap-2">
+                <InfoSquare size={16} className="text-[#4A7729]" />
+                Descripción
+            </h4>
+            <div className="bg-white p-4 rounded-xl border border-gray-100 text-gray-600 text-sm leading-relaxed">
+                {description || "No hay descripción disponible."}
+            </div>
+        </section>
+
       </div>
-      <Separator />
-      {description && (
-        <section className="flex flex-col gap-4">
-          <p className="text-uaq-accent text-[16px] leading-normal font-medium uppercase">
-            Acerca del empleo
-          </p>
-          <p className="text-[20px] leading-normal font-bold text-zinc-800">Descripción</p>
-          <p className="text-[20px] leading-normal font-normal text-zinc-800">{description}</p>
-        </section>
-      )}
-      {requiredProfile?.length ? (
-        <section className="flex flex-col gap-4">
-          <p className="text-[20px] leading-normal font-bold text-zinc-800">Perfil requerido</p>
-          <p className="text-[20px] leading-normal font-normal text-zinc-800">
-            {requiredProfile[0].skill}
-          </p>
-        </section>
-      ) : null}
-      {vacancyCareer?.length ? (
-        <section className="flex flex-col gap-4">
-          <p className="text-[20px] leading-normal font-bold text-zinc-800">Carreras afines</p>
-          <ul className="list-inside list-disc text-[20px] leading-normal font-normal text-zinc-800">
-            {vacancyCareer.map((c) => (
-              <li key={c}>{c}</li>
-            ))}
-          </ul>
-        </section>
-      ) : null}
-      {employeeBenefit.length ? (
-        <section className="flex flex-col gap-4">
-          <p className="text-[20px] leading-normal font-bold text-zinc-800">Beneficios</p>
-          <p className="text-[20px] leading-normal font-normal text-zinc-800">{employeeBenefit}</p>
-        </section>
-      ) : null}
-      {additionaSupport.length ? (
-        <section className="flex flex-col gap-4">
-          <p className="text-[20px] leading-normal font-bold text-zinc-800">Beneficios</p>
-          <p className="text-[20px] leading-normal font-normal text-zinc-800">{additionaSupport}</p>
-        </section>
-      ) : null}
-      {experience?.length ? (
-        <section className="flex flex-col gap-4">
-          <p className="text-[20px] leading-normal font-bold text-zinc-800">
-            Experiencia requerida
-          </p>
-          <div className="flex flex-col gap-2">
-            {experience.map((e, i) => (
-              <div key={i} className="flex items-center gap-5">
-                • <p>{e.skill}</p>
-                {e.time ? <p>{e.time}</p> : null}
-              </div>
-            ))}
-          </div>
-        </section>
-      ) : null}
     </DrawerContent>
   );
 }

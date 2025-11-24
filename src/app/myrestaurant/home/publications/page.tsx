@@ -38,22 +38,15 @@ const VacanciesContent = ({
           <h2 className="text-[#0C3252] font-bold text-lg uppercase tracking-wide">
             MIS PUBLICACIONES
           </h2>
-          <button className="text-[#0C3252] hover:text-red-500 transition-colors hover:bg-blue-100 p-2 rounded-full">
-            <TrashBinMinimalistic size={24} />
-          </button>
+          
         </div>
 
         <div className="p-6">
-          {/* ELIMINAMOS LOS BOTONES MANUALES DE AQUÍ.
-             Los filtros ahora se generan automáticamente dentro de DataTableCustomSearchBar 
-             usando el prop 'filters={filtersVacancies}'
-          */}
-
-          {/* TABLA */}
+          
           <DataTableCustomSearchBar
             columns={vacanciesColumns}
             data={DataVacancies}
-            filters={filtersVacancies} // Aquí entran tus nuevos filtros de comida
+            filters={filtersVacancies} 
           />
         </div>
       </div>
@@ -67,7 +60,6 @@ const VacanciesContent = ({
     );
   }
 
-  // ... Resto de estados (reviewed, rejected) ...
   return (
       <div className="text-center p-10">
           <p>Tu cuenta está en estado: {accountStatus}</p>
