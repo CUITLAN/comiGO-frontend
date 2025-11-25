@@ -1,44 +1,13 @@
-import { FoodItem } from "./foodData";
+import { FoodItem, dummyFoodData } from "@/data/foodData";
+
+// EN LUGAR DE REPETIR DATOS:
+// Importamos la "Base de Datos" central (dummyFoodData) y seleccionamos 
+// los platillos que queremos simular que están en el carrito.
 
 export const initialCartData: FoodItem[] = [
-  {
-    id: '1',
-    name: 'Hamburguesa Clásica',
-    image: '/food-hero-mobile.jpg', 
-    cookedDate: '12/12/2025',
-    rating: 4,
-    restaurantName: 'Fonda Matilda',
-    price: 150,
-    category: 'Carnes'
-  },
-  {
-    id: '2',
-    name: 'Tacos Dorados (Orden)',
-    image: '/sandwich-hero.jpg', 
-    cookedDate: '12/12/2025',
-    rating: 5,
-    restaurantName: 'Antojitos Doña Pelo',
-    price: 85,
-    category: 'Mexicana'
-  },
-  {
-    id: '3',
-    name: 'Rebanada de Pizza',
-    image: '/food-delivery-happy.jpg', 
-    cookedDate: '12/12/2025',
-    rating: 3,
-    restaurantName: 'Pizzas del Centro',
-    price: 45,
-    category: 'Rápida'
-  },
-  {
-    id: '4',
-    name: 'Café Americano',
-    image: '/food-hero-mobile.jpg', 
-    cookedDate: '12/12/2025',
-    rating: 5,
-    restaurantName: 'Café El Despertar',
-    price: 35,
-    category: 'Bebidas'
-  },
+  // Simulamos que el carrito tiene la Hamburguesa (ID '1')
+  dummyFoodData.find(item => item.id === '1') as FoodItem,
+  
+  // Simulamos que el carrito tiene los Tacos (ID '3')
+  dummyFoodData.find(item => item.id === '3') as FoodItem,
 ];

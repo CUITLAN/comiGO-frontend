@@ -2,73 +2,94 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { RestaurantItem } from '@/data/restaurantData';
-import { Heart, Star, MapPoint, Shop } from '@solar-icons/react';
+import { Heart, Star, MapPoint, ClockCircle } from '@solar-icons/react';
 
 interface RestaurantCardProps {
   item: RestaurantItem;
 }
 
 export function RestaurantCard({ item }: RestaurantCardProps) {
-  const [isFavorite, setIsFavorite] = useState(true); // Asumimos true porque está en favoritos
+  const [isFavorite, setIsFavorite] = useState(true); // Asumimos true porque estamos en favoritos
+
+  const toggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+  };
 
   return (
-    <div className="w-full bg-white border border-gray-300 rounded-xl p-3 flex gap-3 shadow-sm hover:shadow-md transition-shadow">
+    <div className="relative w-full bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden group">
       
-      {/* Imagen del Restaurante */}
-      <div className="relative w-28 h-28 shrink-0 rounded-lg overflow-hidden bg-gray-100">
-        <Image
-          src={item.image}
-          alt={item.name}
-          fill
-          className="object-cover"
-        />
-      </div>
-
-      {/* Información */}
-      <div className="flex-1 flex flex-col justify-between py-1">
+      {/* Enlace a la página dinámica del restaurante */}
+      <Link href={`/client/user/restaurant/${item.id}`} className="flex flex-col w-full h-full">
         
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-bold text-gray-900 text-lg leading-tight line-clamp-1">
-              {item.name}
-            </h3>
-            <div className="flex items-center gap-1 mt-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                    <Star 
-                        key={star} 
-                        className={`w-3 h-3 ${star <= item.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`} 
-                    />
-                ))}
-            </div>
-          </div>
+        {/* Banner Superior */}
+        <div className="relative w-full h-32 bg-gray-100">
+          <Image
+            src={item.image}
+            alt={item.name}
+            fill
+            className="object-cover"
+          />
           
-          {/* Botón Favorito (Tienda) */}
-          <button 
-            onClick={() => setIsFavorite(!isFavorite)}
-            className="text-gray-400 hover:scale-110 transition-transform"
+          {/* Overlay Gradiente para texto */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+
+          {/* Botón Favorito Flotante */}
+          <div 
+            onClick={toggleFavorite}
+            className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full text-gray-400 hover:scale-110 transition-transform z-10 cursor-pointer shadow-sm"
           >
             <Heart 
                 weight={isFavorite ? "Bold" : "Linear"} 
-                className={`w-6 h-6 ${isFavorite ? "text-red-500" : "text-black"}`}
+                className={`w-5 h-5 ${isFavorite ? "text-red-500" : "text-gray-400"}`}
             />
-          </button>
+          </div>
+
+          {/* Logo Flotante superpuesto */}
+          <div className="absolute -bottom-4 left-4 w-12 h-12 rounded-full border-2 border-white bg-white shadow-md overflow-hidden z-10">
+             <Image 
+                src={item.logo}
+                alt="Logo"
+                fill
+                className="object-contain p-1"
+             />
+          </div>
         </div>
 
-        {/* Footer: Dirección y Categoría */}
-        <div className="mt-auto space-y-1">
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-                <Shop className="w-4 h-4 text-[#0C3252]" /> {/* Icono de tienda para distinguir */}
-                <span className="font-medium text-[#0C3252]">{item.category}</span>
+        {/* Contenido */}
+        <div className="pt-6 px-4 pb-4 flex-1 flex flex-col justify-between">
+          
+          <div className="flex justify-between items-start mb-2">
+            <div>
+                <h3 className="font-bold text-gray-900 text-lg leading-tight">
+                {item.name}
+                </h3>
+                <p className="text-xs text-gray-500 font-medium mt-0.5">{item.category}</p>
             </div>
             
-            <div className="flex items-start gap-1 text-xs text-gray-500">
-                <MapPoint className="w-3 h-3 mt-0.5 shrink-0" />
-                <span className="line-clamp-1">Dirección: {item.address}</span>
+            {/* Rating Badge */}
+            <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg border border-yellow-100">
+                <Star className="w-3 h-3 text-yellow-500 fill-yellow-500" />
+                <span className="text-xs font-bold text-gray-700">{item.rating}</span>
             </div>
-        </div>
+          </div>
 
-      </div>
+          <div className="flex items-center gap-4 text-xs text-gray-500 mt-2">
+             <div className="flex items-center gap-1">
+                <ClockCircle className="w-3.5 h-3.5 text-gray-400" />
+                <span>{item.deliveryTime}</span>
+             </div>
+             <div className="flex items-center gap-1">
+                <MapPoint className="w-3.5 h-3.5 text-gray-400" />
+                <span className="truncate max-w-[120px]">Centro, Qro</span>
+             </div>
+          </div>
+
+        </div>
+      </Link>
     </div>
   );
 }

@@ -8,19 +8,18 @@ import { FoodCard } from '@/components/client/FoodCard';
 import { CategoryList } from '@/components/client/CategoryList';
 
 export default function ClientHomePage() {
-  // 1. ESTADO PARA FILTROS
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  // 2. LÓGICA DE FILTRADO
   const filteredFood = useMemo(() => {
     return dummyFoodData.filter((item) => {
-      // Filtro por texto (nombre o restaurante)
+      // FIX: Accedemos correctamente a item.restaurant.name
+      const restaurantName = item.restaurant?.name || '';
+      
       const matchesSearch = 
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.restaurantName.toLowerCase().includes(searchQuery.toLowerCase());
+        restaurantName.toLowerCase().includes(searchQuery.toLowerCase());
       
-      // Filtro por categoría
       const matchesCategory = selectedCategory 
         ? item.category === selectedCategory 
         : true;
@@ -32,7 +31,6 @@ export default function ClientHomePage() {
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFBF7] pb-24">
       
-      {/* HEADER */}
       <div className="sticky top-0 z-30 bg-[#EBEBEB] px-6 py-3 flex justify-between items-center shadow-sm">
         <h1 className="text-lg font-bold text-[#0C3252] tracking-wide">INICIO</h1>
         <button className="text-black hover:text-[#529A60]">
@@ -42,13 +40,13 @@ export default function ClientHomePage() {
 
       <div className="p-4 space-y-6">
         
-        {/* BANNER HERO */}
         <div className="relative w-full h-40 rounded-2xl overflow-hidden shadow-md group">
             <Image
                 src="/Login.png"
-                alt="Banner"
+                alt="Banner promocional de comida" // Alt descriptivo
                 fill
                 className="object-cover"
+                priority // Buena práctica para la imagen principal (LCP)
             />
             <div className="absolute inset-0 bg-black/50 flex items-center px-6">
                 <h2 className="text-white font-bold text-xl max-w-[200px] leading-snug drop-shadow-md relative z-10">
@@ -58,7 +56,6 @@ export default function ClientHomePage() {
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#529A60] z-20" />
         </div>
 
-        {/* BARRA DE BÚSQUEDA */}
         <div className="relative">
             <input 
                 type="text" 
@@ -72,14 +69,12 @@ export default function ClientHomePage() {
             </div>
         </div>
 
-        {/* --- AQUÍ ESTABA EL ERROR --- */}
-        {/* Debes pasarle las props 'selectedCategory' y 'onSelectCategory' */}
+       
         <CategoryList 
             selectedCategory={selectedCategory} 
             onSelectCategory={setSelectedCategory} 
         />
 
-        {/* FEED DE COMIDA */}
         <div className="space-y-4">
             {filteredFood.length > 0 ? (
                 filteredFood.map((item) => (

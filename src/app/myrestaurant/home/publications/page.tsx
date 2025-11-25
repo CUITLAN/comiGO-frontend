@@ -19,7 +19,6 @@ const VacanciesContent = ({
   accountStatus: 'approved' | 'reviewed' | 'rejected';
 }) => {
   
-  // Estado vacío común
   const commonEmptyState = (
     <div className="flex w-full flex-col items-center justify-center text-center py-10">
       <EmptyDisplay
