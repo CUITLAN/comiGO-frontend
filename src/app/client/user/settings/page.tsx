@@ -98,7 +98,7 @@ export default function ClientSettingsPage() {
 
         <div className="space-y-4">
             
-            <Link href="/client/orders" className="block"> 
+            <Link href="/client/user/orders" className="block"> 
                 <div className="w-full bg-[#2D4F32] hover:bg-[#244029] text-white rounded-xl px-6 py-4 flex justify-between items-center shadow-md transition-colors cursor-pointer group">
                     <span className="font-bold text-lg">Mis pedidos</span>
                     <div className="bg-white/20 p-1.5 rounded-full group-hover:bg-white/30 transition-colors">
@@ -107,7 +107,7 @@ export default function ClientSettingsPage() {
                 </div>
             </Link>
 
-            <Link href="/client/profile" className="block"> 
+            <Link href="/client/user/profile" className="block"> 
                 <div className="w-full bg-[#2D4F32] hover:bg-[#244029] text-white rounded-xl px-6 py-4 flex justify-between items-center shadow-md transition-colors cursor-pointer group">
                     <span className="font-bold text-lg">Datos de acceso</span>
                     <div className="bg-white/20 p-1.5 rounded-full group-hover:bg-white/30 transition-colors">

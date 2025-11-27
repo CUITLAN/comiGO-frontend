@@ -3,34 +3,29 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { toast } from "sonner";
 
 interface CancelOrderProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   clientName: string;
+  // CAMBIO CLAVE: Agregamos onConfirm que recibe el string de la razón
+  onConfirm: (reason: string) => void;
 }
 
-export function CancelOrderDialog({ open, onOpenChange, clientName }: CancelOrderProps) {
+export function CancelOrderDialog({ open, onOpenChange, clientName, onConfirm }: CancelOrderProps) {
   const [reason, setReason] = useState("");
   const MIN_CHARS = 50;
 
   const handleCancel = () => {
-    // Validación de seguridad (aseguramos que cumpla el mínimo)
+    // Validación local de longitud
     if (reason.trim().length < MIN_CHARS) return;
 
-    // TODO: FASE API - Aquí enviaremos la petición de cancelación al backend
-    // await cancelOrderApi(orderId, reason);
-
-    // ÉXITO
-    toast.success("Pedido cancelado", {
-      description: "Se ha cancelado el pedido exitosamente.",
-      duration: 3000,
-    });
-
-    // Limpieza
+    // Enviamos la razón al padre (quien llamará a la API)
+    onConfirm(reason);
+    
+    // Limpiamos el estado
     setReason("");
-    onOpenChange(false);
+    // Igual que el otro modal, dejamos que el padre cierre el modal si todo sale bien.
   };
 
   const currentLength = reason.trim().length;
@@ -38,10 +33,9 @@ export function CancelOrderDialog({ open, onOpenChange, clientName }: CancelOrde
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
-        if (!isOpen) setReason(""); // Limpiar texto si se cierra sin guardar
+        if (!isOpen) setReason(""); 
         onOpenChange(isOpen);
     }}>
-      {/* Borde rojo lateral para indicar zona de peligro */}
       <DialogContent className="sm:max-w-lg bg-white border-l-4 border-l-[#FE4141]">
         <DialogHeader>
           <DialogTitle className="text-[#0C3252] text-lg font-bold uppercase">CANCELAR PEDIDO</DialogTitle>
@@ -65,7 +59,6 @@ export function CancelOrderDialog({ open, onOpenChange, clientName }: CancelOrde
                     placeholder={`Por favor, describe detalladamente el motivo de la cancelación (Mínimo ${MIN_CHARS} caracteres)...`}
                 />
                 
-                {/* Contador de caracteres / Feedback visual */}
                 <div className="flex justify-end">
                     {isInvalid ? (
                        <p className="text-xs text-red-400 italic">
@@ -90,7 +83,6 @@ export function CancelOrderDialog({ open, onOpenChange, clientName }: CancelOrde
                 Volver
             </Button>
             
-            {/* Botón condicional: Se bloquea si no llega a 50 caracteres */}
             <Button 
                 onClick={handleCancel}
                 disabled={isInvalid}
@@ -100,7 +92,7 @@ export function CancelOrderDialog({ open, onOpenChange, clientName }: CancelOrde
                     : "bg-[#FE4141] hover:bg-red-600 shadow-md hover:shadow-lg"
                 }`}
             >
-                Cancelar Pedido
+                Confirmar Cancelación
             </Button>
           </div>
         </DialogFooter>

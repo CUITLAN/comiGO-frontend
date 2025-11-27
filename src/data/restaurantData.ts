@@ -29,8 +29,8 @@ export const dummyRestaurantData: RestaurantItem[] = [
   {
     id: '101',
     name: 'Fonda Matilda',
-    image: '/FondoLanding.png',
-    logo: '/ComiGo-Logo.png',
+    image: '/Fonda1.png',
+    logo: '/Fonda1.png',
     rating: 4.5,
     category: 'Mexicana',
     deliveryTime: '30-45 min',

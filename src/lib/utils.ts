@@ -43,3 +43,14 @@ export function toYMD(date: Date): string {
     date.getDate(),
   ).padStart(2, '0')}`;
 }
+
+export const cleanPhoneNumber = (phoneObj: { code: string; number: string }): string => {
+    // Si el objeto no existe o el número está vacío, devolvemos un string vacío
+    if (!phoneObj || !phoneObj.number) {
+        return '';
+    }
+    // Asumimos que el código es siempre el mismo o no se usa, solo limpiamos el número
+    // Eliminamos caracteres no numéricos y devolvemos solo los 10 dígitos.
+    const cleanedNumber = phoneObj.number.replace(/[^0-9]/g, '').slice(0, 10);
+    return cleanedNumber;
+};

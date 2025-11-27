@@ -1,50 +1,47 @@
+
 'use client';
 
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
+// Definimos la interfaz exacta que espera tu Header
 interface LogoutModalProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;   // Esta es la prop que faltaba en la definición
   onConfirm: () => void;
 }
 
-export default function LogoutModal({ open, onOpenChange, onConfirm }: LogoutModalProps) {
+export default function LogoutModal({ open, onClose, onConfirm }: LogoutModalProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-white rounded-xl">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-center text-[#0C3252] text-xl font-bold">
-            CERRAR SESIÓN
-          </DialogTitle>
-          <DialogDescription className="text-center text-gray-600 text-base">
-            ¿Está seguro que quiere cerrar sesión?
+    <Dialog open={open} onOpenChange={(isOpen) => {
+        // Si el cambio de estado es "cerrar" (false), ejecutamos onClose
+        if (!isOpen) onClose();
+    }}>
+      <DialogContent className="sm:max-w-md bg-white">
+        <DialogHeader>
+          <DialogTitle className="text-[#0C3252]">¿Cerrar sesión?</DialogTitle>
+          <DialogDescription className="text-gray-600">
+            ¿Estás seguro de que quieres salir de tu cuenta? Tendrás que iniciar sesión nuevamente para acceder.
           </DialogDescription>
         </DialogHeader>
         
-        <DialogFooter className="flex sm:justify-center gap-4 mt-6 w-full">
-          {/* Botón Cancelar */}
-          <Button 
-            variant="primary" 
-            onClick={() => onOpenChange(false)}
-            className="flex-1 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg h-11 font-semibold"
-          >
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="ghost" onClick={onClose} className="text-gray-600 hover:bg-gray-100">
             Cancelar
           </Button>
-          
-          {/* Botón Confirmar (Rojo para acción destructiva/salida) */}
           <Button 
-            onClick={onConfirm}
-            className="flex-1 bg-[#FE4141] hover:bg-red-600 text-white rounded-lg h-11 font-semibold"
+            variant="primary" color="danger" 
+            onClick={onConfirm} 
+            className="bg-red-500 hover:bg-red-600 text-white"
           >
-            Aceptar
+            Cerrar Sesión
           </Button>
         </DialogFooter>
       </DialogContent>

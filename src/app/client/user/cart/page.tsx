@@ -2,19 +2,36 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; // Agregado para navegación
+import { useRouter } from 'next/navigation';
 import { Bag } from '@solar-icons/react';
-import { initialCartData } from '@/data/cartData';
 import { CartFoodCard } from '@/components/client/cartFood';
 import { Button } from '@/components/ui/button';
 import EmptyDisplay from '@/components/empty-display/EmptyDisplay';
 import { ConfirmPurchaseDialog } from '@/components/ui/modal/ConfirmPurchaseDialog'; 
 import { toast } from 'sonner'; 
+import axios from 'axios';
+
+// Stores
+import { useCartStore } from '@/store/useCartStore';
+import { useAuthStore } from '@/store/useAuthStore';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
 export default function CartPage() {
-  const [cartItems, setCartItems] = useState(initialCartData);
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false); 
+  const router = useRouter();
+  
+  // 1. Acceso al Store del Carrito
+  const { items: cartItems, removeItem, clearCart } = useCartStore();
+  
+  // 2. Acceso al Usuario (para crear la orden)
+  const { user, accessToken } = useAuthStore();
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price, 0);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false); 
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Cálculos financieros
+  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const serviceFee = subtotal * 0.05; 
   const donation = subtotal * 0.05;   
   const total = subtotal + serviceFee + donation;
@@ -23,34 +40,68 @@ export default function CartPage() {
     return new Intl.NumberFormat('es-MX', {
       style: 'currency',
       currency: 'MXN',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      minimumFractionDigits: 2,
     }).format(amount);
   };
 
-  const handleRemoveItem = (id: string) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  const handleConfirmPurchase = async () => {
+    if (!user || !accessToken) {
+        toast.error("Debes iniciar sesión para completar la compra");
+        router.push('/login');
+        return;
+    }
 
-  const handleConfirmPurchase = () => {
-    // 1. Vaciar el carrito visualmente
-    setCartItems([]);
+    setIsProcessing(true);
 
-    // 2. Alerta de éxito con el mensaje solicitado
-    toast.success("Se ha notificado al restaurante de tu recogida", {
-        description: "Mas información en tu perfil.",
-        duration: 5000,
-        style: {
-            background: '#F0FDF4', 
-            border: '1px solid #4A7729',
-            color: '#15803d'
-        }
-    });
+    try {
+        // 3. Crear una orden por cada ítem en el carrito
+        // (Idealmente el backend tendría un endpoint de 'bulk-create', pero iteramos por ahora)
+        const orderPromises = cartItems.map(item => {
+            return axios.post(
+                `${API_URL}/orders`, 
+                {
+                    userId: user.id,
+                    productId: item.id,
+                    branchId: item.branchId,
+                    quantity: item.quantity,
+                    totalPrice: item.price * item.quantity, // Total por línea
+                    // pickupCode: se genera en backend si no se envía
+                },
+                { headers: { Authorization: `Bearer ${accessToken}` } }
+            );
+        });
+
+        await Promise.all(orderPromises);
+
+        // 4. Éxito: Limpiar y Notificar
+        clearCart();
+        setIsConfirmOpen(false);
+        
+        toast.success("¡Pedido Confirmado!", {
+            description: "Se ha notificado al restaurante. Revisa 'Mis Pedidos' para ver el código de entrega.",
+            duration: 5000,
+            style: {
+                background: '#F0FDF4', 
+                border: '1px solid #4A7729',
+                color: '#15803d'
+            }
+        });
+
+        // Opcional: Redirigir a la lista de pedidos
+        // router.push('/client/user/orders');
+
+    } catch (error) {
+        console.error("Error creando orden:", error);
+        toast.error("Hubo un problema al procesar tu pedido. Intenta nuevamente.");
+    } finally {
+        setIsProcessing(false);
+    }
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-[#FDFBF7] pb-24"> 
       
+      {/* HEADER */}
       <div className="sticky top-0 z-30 bg-[#EBEBEB] px-6 py-3 flex justify-between items-center shadow-sm">
         <h1 className="text-lg font-bold text-[#0C3252] tracking-wide uppercase">Tu Carrito</h1>
         <div className="text-black">
@@ -60,6 +111,7 @@ export default function CartPage() {
 
       <div className="p-4 space-y-6 flex-1"> 
         
+        {/* Banner */}
         <div className="relative w-full h-32 rounded-2xl overflow-hidden shadow-md group shrink-0">
             <Image
                 src="/Carrusel2.jpg"
@@ -75,28 +127,35 @@ export default function CartPage() {
             <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#529A60]" />
         </div>
 
+        {/* Lista de Items */}
         <div className="space-y-3">
             {cartItems.length > 0 ? (
                 cartItems.map((item) => (
                     <CartFoodCard 
                         key={item.id} 
                         item={item} 
-                        onRemove={handleRemoveItem}
+                        onRemove={() => removeItem(item.id)}
                     />
                 ))
             ) : (
-                <div className="py-10">
+                <div className="py-10 flex flex-col items-center text-center">
                     <EmptyDisplay
                         icon={<Bag className="w-20 h-20 text-gray-300" />} 
                         firstLine="Tu carrito está vacío"
-                        secondline="Explora nuestros platillos."
+                        secondline="Explora nuestros platillos para salvar comida."
                     />
+                    <Link href="/client/home">
+                        <Button className="mt-4 bg-[#529A60] hover:bg-[#468753] text-white">
+                            Explorar Menú
+                        </Button>
+                    </Link>
                 </div>
             )}
         </div>
 
       </div>
 
+      {/* Footer de Totales */}
       {cartItems.length > 0 && (
           <div className="px-6 bg-[#FDFBF7] pt-4">
             <hr className="border-gray-300 mb-4" />
@@ -104,7 +163,7 @@ export default function CartPage() {
             <div className="space-y-1 text-right text-sm text-gray-700 font-medium mb-4">
                 <p>Tu pedido: <span className="font-bold">{formatCurrency(subtotal)}</span></p>
                 <p>Servicio (5%): <span className="font-bold">{formatCurrency(serviceFee)}</span></p>
-                <p>Donación ONG (5%): <span className="font-bold">{formatCurrency(donation)}</span></p>
+                <p>Donación ONG (5%): <span className="font-bold text-[#529A60]">{formatCurrency(donation)}</span></p>
             </div>
 
             <div className="space-y-4">
@@ -123,8 +182,9 @@ export default function CartPage() {
                 <Button 
                     className="w-full bg-[#4285F4] hover:bg-[#3367D6] text-white text-base font-bold h-11 rounded-xl shadow-md mb-2"
                     onClick={() => setIsConfirmOpen(true)}
+                    disabled={isProcessing}
                 >
-                    Confirmar Compra
+                    {isProcessing ? 'Procesando...' : 'Confirmar Compra'}
                 </Button>
             </div>
           </div>

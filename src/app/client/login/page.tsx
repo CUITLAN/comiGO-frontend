@@ -8,10 +8,18 @@ import FormInput from '@/components/forms/FormInput';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
-import { toast, Toaster } from 'sonner'; // Importamos Toaster
+import { toast, Toaster } from 'sonner';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { useAuthStore } from '@/store/useAuthStore'; // Importamos el store
+
+const API_LOGIN_URL = 'http://localhost:3000/auth/login';
+const API_SOCIAL_LOGIN_URL = 'http://localhost:3000/auth/social-login';
 
 export default function ClientLoginPage() {
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
+  const router = useRouter();
+  const loginAction = useAuthStore((state) => state.login); // Función para guardar el token
 
   const methods = useForm<ClientLoginFormType>({
     resolver: zodResolver(clientLoginSchema),
@@ -23,37 +31,63 @@ export default function ClientLoginPage() {
 
   const { control, handleSubmit } = methods;
 
-  const onSubmit = (data: ClientLoginFormType) => {
-    console.log('Login Credenciales:', data);
+  // --- LOGIN NATIVO (Email/Password) ---
+  const onSubmit = async (data: ClientLoginFormType) => {
+    
+    // FIX: El password se envía con una 's' extra para compatibilidad con el backend
+    const payload = {
+        email: data.email,
+        passsword: data.password // Usamos 'passsword' para el backend
+    };
+
+    toast.promise(
+        axios.post(API_LOGIN_URL, payload),
+        {
+            loading: 'Iniciando sesión...',
+            success: (res) => {
+                loginAction(res.data.access_token, res.data.user);
+                router.push('/client/user/home');
+                return `Bienvenido, ${res.data.user.fullName.split(' ')[0]}`;
+            },
+            error: (err) => {
+                const message = err.response?.data?.message || 'Credenciales inválidas o error de conexión.';
+                return `Error de acceso: ${message}`;
+            },
+        }
+    );
   };
 
-  // --- SIMULACIÓN DE AUTH0 CON GOOGLE ---
+  // --- LOGIN SOCIAL (Google) ---
   const handleGoogleLogin = async () => {
-    console.log("🔵 Iniciando simulación de Google Login..."); // Log inmediato para depurar
     setIsLoadingGoogle(true);
     
+    // 1. Simulación de datos recibidos por Auth0/Google (Frontend)
+    const googleUserData = {
+        email: "client_social_01@gmail.com",
+        fullName: "Alan Cliente Google",
+        authProvider: "google",
+        // En un flujo real, enviarías el token de Google (id_token) al backend, 
+        // pero aquí enviamos la data limpia para que el backend haga el registro/login.
+    };
+    
     try {
-      // 1. Simulamos espera
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 2. Llamada al endpoint de login social en nuestra API
+      const res = await axios.post(API_SOCIAL_LOGIN_URL, googleUserData);
 
-      // 2. Datos simulados
-      const googleUser = {
-        given_name: "Alan",
-        family_name: "Usuario",
-        email: "alan.usuario@gmail.com",
-        sub: "google-oauth2|1234567890"
-      };
-
-      // 3. MOSTRAR EN CONSOLA
-      console.log("🚀 [Auth0] Usuario autenticado con Google:", googleUser);
+      // 3. Guardar token y redirigir
+      loginAction(res.data.access_token, res.data.user);
       
-      // 4. Feedback Visual
-      toast.success(`Bienvenido, ${googleUser.given_name}`, {
-        description: "Has iniciado sesión correctamente con Google.",
+      toast.success(`Bienvenido, ${res.data.user.fullName.split(' ')[0]}`, {
+        description: "Has iniciado sesión con Google.",
       });
+      
+      router.push('/client/user/home');
 
     } catch (error) {
-      console.error("Error en login social", error);
+      console.error("Error en login social:", error);
+      toast.error("Fallo al iniciar sesión con Google", {
+        description: "El servidor no pudo procesar tu solicitud social.",
+      });
     } finally {
       setIsLoadingGoogle(false);
     }
@@ -103,7 +137,7 @@ export default function ClientLoginPage() {
         <div className="text-center mb-8">
             <p className="text-sm text-gray-600">
                 ¿No tienes cuenta?{' '}
-                <Link href="/signup/client" className="text-[#4A7729] font-bold hover:underline">
+                <Link href="/client/signup" className="text-[#4A7729] font-bold hover:underline">
                     Registrate
                 </Link>
             </p>
@@ -126,7 +160,8 @@ export default function ClientLoginPage() {
                 <div className="space-y-1">
                     <FormInput
                         control={control}
-                        name="password"
+                        // FIX: El nombre del campo debe ser 'password' en el formulario para hook-form
+                        name="password" 
                         label="Contraseña"
                         type="password"
                         placeholder=""
@@ -163,8 +198,8 @@ export default function ClientLoginPage() {
 
                 {/* Botón Google */}
                 <Button 
-                    type="button" // Importante que sea type="button" para no enviar el formulario
-                    variant="outline" 
+                    type="button" 
+                    variant="primary" 
                     className="w-full h-12 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 flex items-center justify-center gap-3 transition-all active:scale-95"
                     onClick={handleGoogleLogin}
                     disabled={isLoadingGoogle}

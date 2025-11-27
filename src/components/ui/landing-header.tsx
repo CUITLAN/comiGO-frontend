@@ -47,7 +47,7 @@ export default function LandingHeader() {
                     </div>
                 </div>
                 <div className="flex items-center gap-4 py-4">
-                    <Link href={""}>
+                    <Link href={"/login"}>
                         <Button variant="primary" className ="" onClick={() => console.log("Página de registro")}>
                             Iniciar Sesión {
                                 

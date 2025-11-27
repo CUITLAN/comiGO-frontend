@@ -1,30 +1,31 @@
-import { MobileBottomBar } from "@/components/client/MObileBottomBar";
-import { Toaster } from "sonner"; // 1. Importamos el Toaster
+import { Toaster } from "sonner"; 
+import AuthGuard from '@/components/auth/AuthGuard'; 
+import BottomBarStoreWrapper from '@/components/client/BottomBarStoreWrapper'; // Importar el nuevo wrapper
 
 export default function ClientLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  
+  const allowedRoles = ['client']; 
+  
   return (
-    <div className="flex flex-col min-h-screen bg-gray-50 pb-20 relative"> 
-      
-      {/* 2. Agregamos el Toaster aquí. 
-          'top-center' es ideal para móviles. 
-          'richColors' le da los estilos de éxito/error bonitos.
-      */}
-      <Toaster 
-        position="top-center" 
-        richColors 
-        style={{ zIndex: 99999 }} // Aseguramos que flote sobre todo
-      />
+    <AuthGuard allowedRoles={allowedRoles}>
+        <div className="flex flex-col min-h-screen bg-gray-50 pb-20 relative"> 
+        
+            <Toaster 
+                position="top-center" 
+                richColors 
+                style={{ zIndex: 99999 }} 
+            />
 
-      <main className="flex-1 w-full max-w-md mx-auto bg-white min-h-screen shadow-xl overflow-hidden relative">
-         {/* max-w-md simula la vista de celular en pantallas grandes */}
-         {children}
-      </main>
+            <main className="flex-1 w-full max-w-md mx-auto bg-white min-h-screen shadow-xl overflow-hidden relative">
+                {children}
+            </main>
 
-      <MobileBottomBar />
-    </div>
+            <BottomBarStoreWrapper />
+        </div>
+    </AuthGuard>
   );
 }

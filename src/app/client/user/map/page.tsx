@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Bag, Magnifer } from '@solar-icons/react';
 import MapExplore from '@/components/client/MapExplore';
-import { mapRestaurants } from '@/data/mapData';
+// CAMBIO: Usamos los datos centralizados
+import { dummyRestaurantData } from '@/data/restaurantData'; 
 
 export default function ClientMapPage() {
   const [search, setSearch] = useState('');
   const [searchedLocation, setSearchedLocation] = useState<{ lat: number, lng: number } | null>(null);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Lógica de Geocoding (Debounce)
   useEffect(() => {
     if (!search || search.length < 5) return;
 
@@ -20,7 +20,6 @@ export default function ClientMapPage() {
         const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
         if (!token) return;
 
-        // Búsqueda restringida a México
         const query = encodeURIComponent(search);
         const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${query}.json?access_token=${token}&country=mx&limit=1`;
 
@@ -43,7 +42,6 @@ export default function ClientMapPage() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-64px)] bg-[#FDFBF7]"> 
-      {/* h-calc para ajustar con el mobile bar si existe, o h-screen */}
       
       {/* HEADER */}
       <div className="bg-[#EBEBEB] px-6 py-3 flex justify-between items-center shadow-sm shrink-0">
@@ -80,8 +78,11 @@ export default function ClientMapPage() {
       {/* CONTENEDOR MAPA */}
       <div className="flex-1 px-4 pb-20 w-full"> 
         <MapExplore 
-            restaurants={mapRestaurants} 
+            // Usamos la data centralizada (es compatible con MapRestaurant)
+            restaurants={dummyRestaurantData} 
             centerCoordinates={searchedLocation} 
+            // CAMBIO IMPORTANTE: Habilitamos la navegación al detalle desde el mapa
+            baseDetailPath="/client/user/map"
         />
       </div>
 

@@ -2,16 +2,22 @@
 
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-// Importamos el esquema y el tipo que acabamos de definir
 import { clientRegisterSchema, ClientRegisterFormType } from '@/validations/clientRegisterSchema';
 import { Button } from '@/components/ui/button';
 import FormInput from '@/components/forms/FormInput';
 import Image from 'next/image';
 import Link from 'next/link';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+
+const API_REGISTER_URL = 'http://localhost:3000/auth/register-client';
 
 export default function ClientRegisterPage() {
+  const router = useRouter();
   const methods = useForm<ClientRegisterFormType>({
     resolver: zodResolver(clientRegisterSchema),
+    // El default value debe usar el nombre correcto 'password'
     defaultValues: {
       fullName: '',
       email: '',
@@ -21,11 +27,36 @@ export default function ClientRegisterPage() {
     },
   });
 
-  const { control, handleSubmit } = methods;
+  const { control, handleSubmit, reset } = methods;
 
-  const onSubmit = (data: ClientRegisterFormType) => {
-    console.log('Datos de Registro:', data);
-    // Aquí iría la lógica para crear el usuario en tu backend
+  const onSubmit = async (data: ClientRegisterFormType) => {
+    
+    // 1. Desestructuramos para quitar 'confirmPassword' antes de enviar
+    const { confirmPassword, ...registerDto } = data; 
+    
+    // NOTA: El DTO enviado al backend ahora usa {password: '...'}
+
+    console.log(' Intentando enviar DTO:', registerDto); 
+    
+    toast.promise(
+        axios.post(API_REGISTER_URL, registerDto),
+        {
+            loading: 'Creando cuenta...',
+            success: (res) => {
+                reset();
+                console.log('Registro de cliente exitoso. Redirigiendo a login:', res.data);
+                
+                router.push('/client/login'); 
+                
+                return '¡Registro exitoso! Ya puedes iniciar sesión.';
+            },
+            error: (err) => {
+                const message = err.response?.data?.message || 'El correo ya está registrado o hubo un error de conexión.';
+                console.error("❌ Error de API:", err.response?.data);
+                return `Error: ${message}`;
+            },
+        }
+    );
   };
 
   return (
@@ -34,7 +65,7 @@ export default function ClientRegisterPage() {
       {/* --- HERO SECTION (Imagen Superior) --- */}
       <div className="relative h-72 w-full bg-gray-900">
         <Image
-          src="/Signup1.png" // Asegúrate de tener esta imagen en public/
+          src="/Signup1.png" 
           alt="Comida rescatada"
           fill
           className="object-cover opacity-90"
@@ -52,8 +83,6 @@ export default function ClientRegisterPage() {
       </div>
 
       {/* --- TARJETA DEL FORMULARIO --- */}
-      {/* -mt-16: Sube la tarjeta sobre la imagen */}
-      {/* rounded-t-[2.5rem]: Borde superior muy curvo estilo app móvil */}
       <main className="flex-1 bg-white rounded-t-[2.5rem] -mt-16 relative z-10 px-8 pt-8 pb-12 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
         
         {/* Logo y Título */}
@@ -72,7 +101,7 @@ export default function ClientRegisterPage() {
         <div className="text-center mb-6">
             <p className="text-sm text-gray-600 font-medium">
                 ¿Ya tienes cuenta?{' '}
-                <Link href="/client/login" className="text-[#4A7729] font-bold hover:underline">
+                <Link href="/login/client" className="text-[#4A7729] font-bold hover:underline">
                     Inicia sesion
                 </Link>
             </p>
@@ -82,64 +111,24 @@ export default function ClientRegisterPage() {
         <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                 
-                {/* Nombre Completo */}
                 <div className="space-y-1">
-                    <FormInput
-                        control={control}
-                        name="fullName"
-                        label="Nombre completo"
-                        type="text"
-                        placeholder=""
-                        description="Ingresa tu nombre completo."
-                    />
+                    <FormInput control={control} name="fullName" label="Nombre completo" type="text" description="Ingresa tu nombre completo." />
                 </div>
 
-                {/* Correo */}
                 <div className="space-y-1">
-                    <FormInput
-                        control={control}
-                        name="email"
-                        label="Correo"
-                        type="email"
-                        placeholder=""
-                        description="Ingresa tu correo electrónico registrado."
-                    />
+                    <FormInput control={control} name="email" label="Correo" type="email" description="Ingresa tu correo electrónico registrado." />
                 </div>
 
-                {/* Fecha de Nacimiento */}
                 <div className="space-y-1">
-                    <FormInput
-                        control={control}
-                        name="birthDate"
-                        label="Fecha de nacimiento"
-                        type="date"
-                        placeholder=""
-                        description="Ingresa tu fecha de nacimiento."
-                    />
+                    <FormInput control={control} name="birthDate" label="Fecha de nacimiento" type="date" description="Ingresa tu fecha de nacimiento." />
                 </div>
 
-                {/* Contraseña */}
                 <div className="space-y-1">
-                    <FormInput
-                        control={control}
-                        name="password"
-                        label="Contraseña"
-                        type="password"
-                        placeholder=""
-                        description="Ingresa tu contraseña."
-                    />
+                    <FormInput control={control} name="password" label="Contraseña" type="password" description="Ingresa tu contraseña." />
                 </div>
 
-                {/* Confirmar Contraseña */}
                 <div className="space-y-1">
-                    <FormInput
-                        control={control}
-                        name="confirmPassword"
-                        label="Confirmar Contraseña"
-                        type="password"
-                        placeholder=""
-                        description="Repite tu contraseña."
-                    />
+                    <FormInput control={control} name="confirmPassword" label="Confirmar Contraseña" type="password" description="Repite tu contraseña." />
                 </div>
 
                 {/* Botón Continuar */}

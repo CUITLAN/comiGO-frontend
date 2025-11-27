@@ -6,122 +6,142 @@ import { employerSchema, EmployerFormType } from '@/validations/employerSchema';
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { cleanPhoneNumber } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 // --- IMPORTACIÓN DE PASOS ---
-// Asegúrate de que las rutas coincidan con tu estructura de carpetas actual
 import RestaurantDetailsStep from './RestaurantDetailsStep';
 import AccessInfoStep from './accessinfostep';
-import AddImageStep from '../ui/Addimage';     // Según tu ruta
-import LocationStep from '../ui/locationstep'; // Según tu ruta
-import RestaurantVisual from '../ui/RestaurantVisual'; // El nuevo componente visual
+import AddImageStep from '../ui/Addimage';     
+import LocationStep from '../ui/locationstep'; 
+import RestaurantVisual from '../ui/RestaurantVisual'; 
 
 interface SignUpEmployerProps {
   currentStep: number;
   onStepChange: (step: number) => void;
 }
 
+const API_URL = 'http://localhost:3000/auth/register-restaurant'; 
+
 export default function SignUpEmployer({ currentStep, onStepChange }: SignUpEmployerProps) {
+  const router = useRouter();
 
   const methods = useForm<EmployerFormType>({
     resolver: zodResolver(employerSchema),
     mode: 'onChange',
     defaultValues: {
-      // Paso 1
-      restaurantName: '',
-      restaurantType: '',
-      numBranches: 1,
-      openingTime: '',
-      closingTime: '',
-      socialMedia: '',
-      restaurantPhone: { code: '+52', number: '' },
-      // Paso 2
-      employerName: '',
-      employerLastName: '',
-      positionWithinTheCompany: '',
-      employerEmail: '',
-      accountPassword: '',
-      accountPasswordConfirm: '',
-      employerMobilePhone: { code: '+52', number: '' },
-      employerLandlinePhone: { code: '+52', number: '' },
-      // Paso 3
-      restaurantDescription: '',
-      restaurantImages: [null, null, null], 
-      // Paso 4
-      restaurantAddress: '',
-      restaurantLocation: { lat: 19.4326, lng: -99.1332 },
+      restaurantName: '', restaurantType: '', numBranches: 1, openingTime: '09:00', closingTime: '21:00', socialMedia: '', restaurantPhone: { code: '+52', number: '' },
+      employerName: '', employerLastName: '', positionWithinTheCompany: '', employerEmail: '', accountPassword: '', accountPasswordConfirm: '', employerMobilePhone: { code: '+52', number: '' }, employerLandlinePhone: { code: '+52', number: '' },
+      restaurantDescription: '', restaurantImages: [null, null, null], 
+      restaurantAddress: '', restaurantLocation: { lat: 20.5888, lng: -100.3899 },
     },
   });
 
-  // Extraemos métodos necesarios
-  const { control, handleSubmit, trigger, setValue, formState: { errors } } = methods;
+  // 🚨 CORRECCIÓN: Quitamos handleSubmit de la desestructuración
+  const { control, trigger, setValue, formState: { errors } } = methods;
 
-  const onSubmit = (data: EmployerFormType) => {
-    console.log("--- REGISTRO FINALIZADO ---");
-    // Limpiamos las imágenes nulas antes de enviar
-    const cleanData = {
-        ...data,
-        restaurantImages: data.restaurantImages?.filter(img => img !== null)
-    };
-    console.log(cleanData);
-    // Aquí iría tu llamada al backend
+  // --- FUNCIÓN PRINCIPAL DE ENVÍO (Llamada al presionar el botón Finalizar) ---
+  const onSubmit = async (data: EmployerFormType) => {
+    
+    // ⚠️ VALIDACIÓN FINAL COMPLETA antes de enviar
+    const allFieldsValid = await trigger();
+    if (!allFieldsValid) {
+        toast.error("Faltan datos obligatorios. Revisa los pasos anteriores.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+    }
+    
+    // 1. Crear el objeto FormData para enviar archivos y JSON juntos
+    const formData = new FormData();
+    
+    const createRegisterDto = () => ({
+        restaurantName: data.restaurantName, restaurantType: data.restaurantType, numBranches: data.numBranches, openingTime: data.openingTime, closingTime: data.closingTime, socialMedia: data.socialMedia, restaurantPhone: cleanPhoneNumber(data.restaurantPhone),
+        employerName: data.employerName, employerLastName: data.employerLastName, positionWithinTheCompany: data.positionWithinTheCompany, employerEmail: data.employerEmail, accountPassword: data.accountPassword, accountPasswordConfirm: data.accountPasswordConfirm, employerMobilePhone: cleanPhoneNumber(data.employerMobilePhone), employerLandlinePhone: cleanPhoneNumber(data.employerLandlinePhone),
+        restaurantDescription: data.restaurantDescription, restaurantAddress: data.restaurantAddress, latitude: data.restaurantLocation.lat, longitude: data.restaurantLocation.lng,
+    });
+
+    const jsonDto = JSON.stringify(createRegisterDto());
+    formData.append('dto', jsonDto); 
+    
+    const files = data.restaurantImages?.filter(img => img instanceof File) || [];
+    
+    if (files.length > 0) {
+        formData.append('logoFile', files[0]); 
+    }
+    for (let i = 1; i < files.length; i++) {
+        formData.append('galleryFiles', files[i]); 
+    }
+
+    // 4. Llamada a la API
+    toast.promise(
+        axios.post(API_URL, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', 
+            }
+        }),
+        {
+            loading: 'Creando tu restaurante y subiendo imágenes...',
+            success: (res) => {
+                methods.reset();
+                
+                // REDIRECCIÓN SOLICITADA TRAS EL SUBMIT EXITOSO
+                router.push('/login'); 
+                
+                return `Registro exitoso! Ya puedes iniciar sesión.`;
+            },
+            error: (err) => {
+                console.error("❌ ERROR API:", err.response?.data || err);
+                return `Error al registrar: ${err.response?.data?.message || 'Revisa tu conexión o credenciales S3.'}`;
+            },
+        }
+    );
   };
 
-  // --- LÓGICA SIGUIENTE ---
+  // --- LÓGICA DE AVANCE (Solo valida y avanza, no hace submit) ---
   const handleNextStep = async () => {
     let fieldsToValidate: (keyof EmployerFormType)[] = [];
     
     if (currentStep === 1) {
-      fieldsToValidate = [
-        'restaurantName', 'restaurantType', 'numBranches', 
-        'openingTime', 'closingTime', 'restaurantPhone'
-      ];
+      fieldsToValidate = ['restaurantName', 'restaurantType', 'numBranches', 'openingTime', 'closingTime', 'restaurantPhone'];
     } else if (currentStep === 2) {
-      fieldsToValidate = [
-        'employerName', 'employerLastName', 'positionWithinTheCompany', 
-        'employerEmail', 'accountPassword', 'accountPasswordConfirm',
-        'employerMobilePhone' // Importante validar el móvil si es requerido
-      ];
+      fieldsToValidate = ['employerName', 'employerLastName', 'positionWithinTheCompany', 'employerEmail', 'accountPassword', 'accountPasswordConfirm', 'employerMobilePhone'];
     } else if (currentStep === 3) {
-       // Paso 3: Descripción
        fieldsToValidate = ['restaurantDescription'];
     } else if (currentStep === 4) {
-       // Paso 4: Dirección y Mapa
        fieldsToValidate = ['restaurantAddress', 'restaurantLocation'];
     }
-    // Paso 5: No requiere validación para entrar, solo para salir (submit)
 
-    const isStepValid = await trigger(fieldsToValidate);
-    
+    const isStepValid = await trigger(fieldsToValidate as any);
+
     if (isStepValid) {
-      if (currentStep < 5) { // Ahora el límite es 5
+      if (currentStep < totalSteps) { 
           onStepChange(currentStep + 1);
           window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else {
-          // Estamos en el paso 5 y dimos "Finalizar"
-          handleSubmit(onSubmit)();
       }
+    } else {
+        // Si hay errores, forzamos el scroll hacia arriba para que se vean
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  // --- LÓGICA ATRÁS (Faltaba esta función en tu snippet) ---
+  // --- LÓGICA ATRÁS ---
   const handlePrevStep = () => {
     onStepChange(currentStep - 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const totalSteps = 5;
+  const isFinalStep = currentStep === totalSteps;
 
   return (
     <FormProvider {...methods}>
-        {/* CAMBIO DE ESTILO: 
-           Usamos max-w-4xl para que la tarjeta visual (Paso 5) tenga espacio suficiente.
-           'max-w-5/6' no es clase estándar de Tailwind, uso w-11/12 max-w-4xl que es equivalente y seguro.
-        */}
-        <form onSubmit={handleSubmit(onSubmit)} className="w-11/12 max-w-4xl space-y-6">
+        {/* 🚨 CORRECCIÓN: Usamos methods.handleSubmit en lugar de handleSubmit desestructurado */}
+        <form onSubmit={methods.handleSubmit(onSubmit)} className="w-11/12 max-w-4xl space-y-6">
         
-        {/* Header */}
+        {/* Header (Mismo código que compartiste) */}
         <div className="flex flex-col items-center mb-6 gap-3">
-            {/* Ajusté el nombre de la imagen para coincidir con tu snippet */}
             <Image src="/ComiGo-Logo.png" alt="ComiGo" width={80} height={80} />
             
             <div className="text-center">
@@ -137,7 +157,6 @@ export default function SignUpEmployer({ currentStep, onStepChange }: SignUpEmpl
               </p>
             </div>
             
-            {/* Barra de Progreso */}
             <div className="w-full max-w-md bg-gray-200 h-1.5 rounded-full mt-2 overflow-hidden mx-auto">
                 <div 
                     className="bg-[#4A7729] h-full transition-all duration-300 ease-in-out" 
@@ -152,38 +171,38 @@ export default function SignUpEmployer({ currentStep, onStepChange }: SignUpEmpl
             {currentStep === 2 && <AccessInfoStep control={control} />}
             {currentStep === 3 && <AddImageStep control={control} setValue={setValue} trigger={trigger} />}
             {currentStep === 4 && <LocationStep control={control} setValue={setValue} errors={errors} />}
-            {/* NUEVO PASO 5 */}
             {currentStep === 5 && <RestaurantVisual />}
         </div>
 
         {/* Botones */}
-        <div className="mt-8 flex flex-col space-y-4 max-w-md mx-auto"> {/* Centramos los botones */}
+        <div className="mt-8 flex flex-col space-y-4 max-w-md mx-auto">
               <div className="flex gap-3">
                   {currentStep > 1 && (
                       <Button 
                         type="button"
                         onClick={handlePrevStep}
-                        variant="primary" // Cambié a outline para mejor UX visual
+                        variant="primary" 
                         className="flex-1 h-12 border-zinc-300 text-zinc-700 hover:bg-zinc-50"
                       >
                         Atrás
                       </Button>
                   )}
-
-                  {currentStep < totalSteps ? (
+                  
+                  {/* Botón Principal: Condicional entre CONTINUAR y FINALIZAR */}
+                  {isFinalStep ? (
                       <Button 
-                        type="button" 
-                        onClick={handleNextStep}
-                        className="flex-1 h-12 bg-[#0088CC] hover:bg-[#0077B3] text-white rounded-lg font-bold text-base transition-colors"
-                      >
-                        Continuar
-                      </Button>
-                  ) : (
-                      <Button 
-                        type="submit" 
+                        type="submit" // Ejecuta el onSubmit al hacer clic en FINALIZAR
                         className="flex-1 h-12 bg-[#4A7729] hover:bg-[#3a611f] text-white rounded-lg font-bold text-base transition-colors"
                       >
                         Finalizar Registro
+                      </Button>
+                  ) : (
+                      <Button 
+                        type="button" 
+                        onClick={handleNextStep} // Solo avanza, no hace submit
+                        className="flex-1 h-12 bg-[#0088CC] hover:bg-[#0077B3] text-white rounded-lg font-bold text-base transition-colors"
+                      >
+                        Continuar
                       </Button>
                   )}
               </div>

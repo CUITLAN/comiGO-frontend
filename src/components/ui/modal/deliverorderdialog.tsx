@@ -2,22 +2,19 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { useState } from "react";
-import { toast } from "sonner"; 
-// Eliminamos la importación del componente Toaster, solo usamos la función toast
 
 interface DeliverOrderProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  // CAMBIO CLAVE: Ahora onConfirm espera recibir el código
+  onConfirm: (code: string) => void;
 }
 
 export function DeliverOrderDialog({ open, onOpenChange, onConfirm }: DeliverOrderProps) {
   const [code, setCode] = useState("");
 
-  // TODO: FASE API - Aquí integraremos la llamada al backend.
-  const CORRECT_CODE = "11111"; 
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Permitimos solo mayúsculas y números
     const value = e.target.value.toUpperCase();
     if (/^[A-Z0-9]*$/.test(value) && value.length <= 5) {
       setCode(value);
@@ -25,26 +22,13 @@ export function DeliverOrderDialog({ open, onOpenChange, onConfirm }: DeliverOrd
   };
 
   const handleConfirm = () => {
-    // TODO: FASE API - Validación asíncrona
-    
-    if (code === CORRECT_CODE) {
-      // ÉXITO
-      onConfirm(); 
-      onOpenChange(false); 
-      
-      toast.success("Pedido entregado", {
-        description: `El pedido ha sido entregado exitosamente.`,
-        duration: 3000,
-      });
-      
-      setCode(""); 
-    } else {
-      // ERROR
-      toast.error("Código incorrecto", {
-        description: "El código no coincide. Verifica e intenta nuevamente.",
-        duration: 3000,
-      });
-    }
+    // Ya no validamos si es "11111". 
+    // Solo enviamos el código al padre para que la API decida.
+    onConfirm(code);
+    setCode(""); 
+    // Nota: No cerramos el modal aquí (onOpenChange(false)) inmediatamente.
+    // Dejamos que el padre lo cierre si la API responde éxito, 
+    // o que se mantenga abierto si hay error.
   };
 
   return (
@@ -74,11 +58,6 @@ export function DeliverOrderDialog({ open, onOpenChange, onConfirm }: DeliverOrd
                     Faltan {5 - code.length} caracteres
                 </p>
             )}
-             {code.length === 5 && code !== CORRECT_CODE && (
-                 <p className="text-xs text-center text-gray-400">
-                    Listo para validar
-                </p>
-            )}
         </div>
 
         <DialogFooter className="flex justify-center sm:justify-center gap-8">
@@ -97,7 +76,7 @@ export function DeliverOrderDialog({ open, onOpenChange, onConfirm }: DeliverOrd
                 : "text-gray-300 cursor-not-allowed"
             }`}
           >
-            Aceptar
+            Confirmar Entrega
           </button>
         </DialogFooter>
       </DialogContent>

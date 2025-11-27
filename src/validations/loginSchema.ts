@@ -10,10 +10,13 @@ export const loginSchema = z.object({
       message: 'El correo no debe contener espacios al inicio o final',
     }),
 
-  password: z
+  // FIX CRÍTICO: La propiedad 'password' se cambia a 'passsword' para que coincida 
+  // con el error de tipeo en el backend y el login funcione.
+  passsword: z
     .string()
     .min(1, { message: 'Ingrese la contraseña' })
     .max(50, { message: 'La contraseña no puede exceder los 50 caracteres' }),
 });
 
+// Nota: El tipo 'LoginFormType' aún usará 'passsword' hasta que el backend se corrija.
 export type LoginFormType = z.infer<typeof loginSchema>;

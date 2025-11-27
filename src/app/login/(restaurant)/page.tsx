@@ -8,32 +8,28 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider } from 'react-hook-form';
 import { LoginFormType, loginSchema } from '@/validations/loginSchema';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/store/useAuthStore';
 
 // --- DATOS DEL CARRUSEL ---
 const slides = [
-  {
-    id: 1,
-    image: "/Login.png", // Tu imagen actual
-    text: "Genera ingresos mientras evitas el desperdicio de comida en Mexico"
-  },
-  {
-    id: 2,
-    image: "/Carrusel2.jpg", // Ejemplo: Usa otra imagen que tengas
-    text: "Conecta con miles de clientes buscando ofertas deliciosas"
-  },
-  {
-    id: 3,
-    image: "/Cartruse3.jpg", // Ejemplo
-    text: "Únete a la red de restaurantes sustentables más grande"
-  }
+  { id: 1, image: "/Login.png", text: "Genera ingresos mientras evitas el desperdicio de comida en Mexico" },
+  { id: 2, image: "/Carrusel2.jpg", text: "Conecta con miles de clientes buscando ofertas deliciosas" },
+  { id: 3, image: "/Cartruse3.jpg", text: "Únete a la red de restaurantes sustentables más grande" }
 ];
 
+const API_LOGIN_URL = 'http://localhost:3000/auth/login';
+
 export default function PublicLogin() {
+  const router = useRouter();
+  const loginAction = useAuthStore((state) => state.login); // Función para guardar el token
   const methods = useForm<LoginFormType>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
-      password: '',
+      passsword: '',
     },
     mode: 'onSubmit',
   });
@@ -51,8 +47,31 @@ export default function PublicLogin() {
     return () => clearInterval(interval);
   }, []);
 
-  const onSubmit = (data: LoginFormType) => {
-    console.log('Iniciaste sesión', data);
+  const onSubmit = async (data: LoginFormType) => {
+    
+    toast.promise(
+        axios.post(API_LOGIN_URL, data),
+        {
+            loading: 'Iniciando sesión...',
+            success: (res) => {
+                const token = res.data.access_token;
+                const user = res.data.user;
+
+                // 1. Guardar token y usuario en Zustand
+                loginAction(token, user);
+
+                // 2. Redirigir al home del restaurante
+                router.push('/myrestaurant/home/sales');
+                
+                return `Bienvenido, ${user.fullName.split(' ')[0]}`;
+            },
+            error: (err) => {
+                // Manejar errores 401 (Unauthorized) del backend
+                const message = err.response?.data?.message || 'Credenciales inválidas o error de conexión.';
+                return `Error de acceso: ${message}`;
+            },
+        }
+    );
   };
 
   return (
@@ -100,7 +119,7 @@ export default function PublicLogin() {
                 <div>
                   <FormInput
                     control={control}
-                    name="password"
+                    name="passsword"
                     label="Contraseña"
                     type="password"
                     maxChars={20}
@@ -132,7 +151,7 @@ export default function PublicLogin() {
                 <p className="text-sm text-zinc-600 font-bold">
                   ¿No tienes cuenta?{' '}
                   <Link 
-                    href="/signup/employer" 
+                    href="/signup/" 
                     className="text-[#4A7729] hover:text-[#3a6120] transition-colors ml-1"
                   >
                     Registrate
@@ -147,7 +166,6 @@ export default function PublicLogin() {
       </div>
 
       {/* --- DERECHA: CARRUSEL --- */}
-      {/* Aumenté el tamaño de la imagen cambiando max-w-md a max-w-xl */}
       <div className="hidden lg:flex flex-1 bg-[#4A7729] flex-col items-center justify-center relative px-8 py-12 transition-all duration-500">
         
         {/* Contenedor de Diapositivas */}
